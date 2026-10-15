@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>313姚明涛的《高级网页设计》课堂实践</title>
+  <style>
+    :root {
+      --bg-1: #f4f7ff;
+      --bg-2: #eef9ff;
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --secondary: #8b5cf6;
+      --accent: #f59e0b;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --card: rgba(255, 255, 255, 0.84);
+      --shadow: 0 20px 45px rgba(59, 130, 246, 0.12);
+      --border: rgba(148, 163, 184, 0.2);
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 26%),
+        radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.12), transparent 30%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0 80px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.96), rgba(139, 92, 246, 0.9));
+      color: #fff;
+      border-radius: 28px;
+      padding: 42px 38px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero::before {
+      width: 240px;
+      height: 240px;
+      top: -70px;
+      right: -40px;
+    }
+
+    .hero::after {
+      width: 180px;
+      height: 180px;
+      bottom: -60px;
+      left: -30px;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 14px;
+      letter-spacing: 1px;
+      margin-bottom: 18px;
+      backdrop-filter: blur(4px);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 3vw, 3.2rem);
+      line-height: 1.2;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      margin-top: 16px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.08rem;
+      line-height: 1.8;
+      max-width: 760px;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .stat {
+      min-width: 150px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 30px;
+      margin-top: 32px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .list-panel {
+      padding: 28px;
+    }
+
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 1.65rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.08);
+    }
+
+    .links {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 14px;
+    }
+
+    .links li {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .links li:hover {
+      transform: translateY(-2px);
+    }
+
+    .links a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      text-decoration: none;
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(248,250,252,0.9));
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 18px;
+      padding: 18px 20px;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .links a span:first-child {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-index {
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      box-shadow: 0 8px 16px rgba(59, 130, 246, 0.18);
+    }
+
+    .page-tag {
+      color: var(--muted);
+      font-size: 0.82rem;
+      background: rgba(59, 130, 246, 0.08);
+      border-radius: 999px;
+      padding: 7px 10px;
+      border: 1px solid rgba(59, 130, 246, 0.1);
+    }
+
+    .aside {
+      padding: 24px 22px;
+    }
+
+    .prompt-box {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(59, 130, 246, 0.08));
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      border-radius: 18px;
+      padding: 18px 16px;
+      color: var(--text);
+      line-height: 1.9;
+      margin-top: 12px;
+      font-size: 0.96rem;
+    }
+
+    .prompt-box strong {
+      color: var(--primary-dark);
+    }
+
+    .meta-list {
+      list-style: none;
+      margin: 18px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .meta-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.02);
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .meta-list li span:first-child {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: 36px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+      letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 820px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 30px 22px;
+      }
+
+      .stats {
+        flex-direction: column;
+      }
+
+      .links a {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="badge">课堂实践导航页</div>
+        <h1>313姚明涛的《高级网页设计》课堂实践</h1>
+        <p class="subtitle">
+          这是一个综合展示 HTML/CSS 学习成果的作品集合，汇总了本目录下的全部网页内容，包含基础网页构建、表单设计、CSS 排版与样式实践等内容。
+        </p>
+        <div class="stats">
+          <div class="stat">
+            <strong>6</strong>
+            <span>网页作品</span>
+          </div>
+          <div class="stat">
+            <strong>1</strong>
+            <span>导航首页</span>
+          </div>
+          <div class="stat">
+            <strong>100%</strong>
+            <span>原生代码</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <section class="panel list-panel">
+        <h2 class="section-title">作品列表</h2>
+        <ul class="links">
+          <li><a href="1.html"><span><i class="page-index">1</i>1.html</span><span class="page-tag">基础网页</span></a></li>
+          <li><a href="2-1.html"><span><i class="page-index">2</i>2-1.html</span><span class="page-tag">学习实践</span></a></li>
+          <li><a href="2-2.html"><span><i class="page-index">3</i>2-2.html</span><span class="page-tag">页面设计</span></a></li>
+          <li><a href="3-1from.html"><span><i class="page-index">4</i>3-1from.html</span><span class="page-tag">表单练习</span></a></li>
+          <li><a href="3-2css.html"><span><i class="page-index">5</i>3-2css.html</span><span class="page-tag">CSS 应用</span></a></li>
+          <li><a href="4-1css2.html"><span><i class="page-index">6</i>4-1css2.html</span><span class="page-tag">高级样式</span></a></li>
+        </ul>
+      </section>
+
+      <aside class="panel aside">
+        <h2 class="section-title">提示词</h2>
+        <div class="prompt-box">
+          <strong>本提示词：</strong><br />
+          “创建一个新页面，包括本目录下的所有网页的超链接，使用原生代码，不使用cdn，新页面名称为index.html，主题为313姚明涛的《高级网页设计》课堂实践，美化页面，页面中包括本提示词。”
+        </div>
+
+        <ul class="meta-list">
+          <li><span>课程</span><span>高级网页设计</span></li>
+          <li><span>班级</span><span>313</span></li>
+          <li><span>作者</span><span>姚明涛</span></li>
+          <li><span>技术</span><span>HTML + CSS</span></li>
+        </ul>
+      </aside>
+    </main>
+
+    <footer>
+      313姚明涛的《高级网页设计》课堂实践 · 导航页
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+       .zy{
+            display: flex;
+            gap:10px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            align-items: flex-start;
+        }
+       .zy img{
+            width:120px;
+            height:70px;
+            object-fit: cover;
+        }
+       .text{
+            flex:1;
+            color:#333;
+        }
+       .text h3{
+            font-size:16px;
+            font-weight:normal;
+            margin-bottom:15px;
+        }
+       .info-row{
+            display:flex;
+            justify-content:space-between;
+            font-size:13px;
+            color:#777;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="zy">
+        <img src="./img/a1.jpg">
+        <div class="text">
+            <h3>标题</h3>
+            <div class="info-row">
+                <span>资讯</span>
+                <span>2020-10-10</span>
+            </div>
+        </div>
+    </div>
+    <div class="zy">
+        <img src="./img/a2.jpg">
+        <div class="text">
+            <h3>标题</h3>
+            <div class="info-row">
+                <span>资讯</span>
+                <span>2020-10-10</span>
+            </div>
+        </div>
+    </div>
+    <div class="zy">
+        <img src="./img/a3.png">
+        <div class="text">
+            <h3>标题</h3>
+            <div class="info-row">
+                <span>资讯</span>
+                <span>2020-10-10</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

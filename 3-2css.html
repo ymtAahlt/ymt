@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>313 姚明涛</title>
+    <style>
+        h3{
+            color: red;
+        }
+        p{
+            color: blue;
+        }
+        /*标签选择器，选择器名称为标签*/
+        #box{
+            width:500px;
+            height: 500px;
+            background-color: #ccc;
+        }
+        /*id选择器，以#开始，唯一*/
+        .n1{
+            color: #7A9;
+        }
+        /*1. h2黑底白字*/
+        h2{
+            background-color: black;
+            color: white;
+        }
+        /*2.名字每个字不同颜色*/
+        .y{ color:red; }
+        .m{ color:blue; }
+        .t{ color:green; }
+        /*3.仅仅“选择器”三个字白色*/
+        .only-white{
+            color:white;
+        }
+        /*4.学号盒子 宽高背景*/
+        .id-box{
+            width:350px;
+            height:90px;
+            background-color:#6688cc;
+            color:white;
+            font-size:22px;
+            text-align:center;
+            line-height:90px;
+        }
+    </style>
+</head>
+<body>
+    <h2>层叠样式表CSS</h2>
+    <div id="box">
+        <!-- CSS保持红色，只有【选择器】三个字白色 -->
+        <h3>CSS<span class="only-white">选择器</span></h3>
+        <!-- 名字每个字不同颜色同一行 -->
+        <p><span class="y">姚</span><span class="m">明</span><span class="t">涛</span></p>
+        <p>CSS属性</p>
+    </div>
+    <!--4.学号盒子-->
+    <div class="id-box">学号：24001010313</div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!--视口适配，多视口测试-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐推荐网页</title>
+    <style>
+        /* ========== 全局公共CSS（实验要求全局CSS） ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft Yahei", sans-serif;
+            background-color: #f4f5f7;
+            color: #333;
+            line-height: 1.6;
+        }
+        ul {
+            list-style: none;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        img {
+            /*图片自适应，防止溢出*/
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .container {
+            width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        section {
+            margin: 40px 0;
+        }
+        .sec-title {
+            font-size: 22px;
+            margin-bottom:20px;
+            border-left:4px solid #2563eb;
+            padding-left:10px;
+        }
+
+        /* ========== 元素1：导航栏 flex实现 ========== */
+        .music-nav {
+            background-color: #2563eb;
+            color:#fff;
+        }
+        .music-nav .container {
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+            height:60px;
+        }
+        .nav-logo {
+            font-size:20px;
+            font-weight:bold;
+        }
+        .nav-list {
+            display:flex;
+            gap:32px;
+        }
+        .nav-list li a {
+            padding:8px 0;
+        }
+
+        /* ========== 元素2：上图下文布局——音乐推荐卡片 flex-column ========== */
+        .card-wrap {
+            display:flex;
+            gap:24px;
+            flex-wrap:wrap; /*允许换行*/
+        }
+        .music-card {
+            width:220px;
+            background:#fff;
+            border-radius:8px;
+            overflow:hidden;
+            display:flex;
+            flex-direction: column; /*上图下文：纵向flex*/
+        }
+        .card-img {
+            width:100%;
+            height:220px;
+            background:#ccc;
+        }
+        .card-text {
+            padding:12px;
+        }
+        .card-text h4 {
+            font-size:16px;
+            margin-bottom:4px;
+            /*单行文字溢出省略号*/
+            white-space: nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .card-text p {
+            font-size:13px;
+            color:#666;
+        }
+
+        /* ========== 元素3：左图右文布局——歌手介绍 ========== */
+        .singer-item {
+            background:#fff;
+            padding:24px;
+            border-radius:8px;
+            display:flex;
+            gap:28px;
+            align-items:center;
+        }
+        .singer-pic {
+            width:160px;
+            height:160px;
+            border-radius:50%;
+            background:#cccccc;
+            flex-shrink:0; /*图片不被压缩*/
+        }
+        .singer-desc {
+            flex:1;
+        }
+        .singer-desc h3 {
+            font-size:20px;
+            margin-bottom:8px;
+        }
+        .singer-desc p {
+            color:#555;
+        }
+
+        /*简单响应式，小屏幕适配，多视口测试用*/
+        @media (max-width:1200px) {
+            .container {
+                width:100%;
+            }
+        }
+        @media (max-width:768px) {
+            .singer-item {
+                flex-direction:column;
+                text-align:center;
+            }
+            .card-wrap {
+                justify-content:center;
+            }
+        }
+    </style>
+</head>
+<body>
+<!--网页元素1：导航栏-->
+<header class="music-nav">
+    <div class="container">
+        <div class="nav-logo">🎵音乐推荐</div>
+        <ul class="nav-list">
+            <li><a href="#">首页</a></li>
+            <li><a href="#">推荐歌单</a></li>
+            <li><a href="#">歌手</a></li>
+            <li><a href="#">排行榜</a></li>
+        </ul>
+    </div>
+</header>
+
+<main class="container">
+    <!--网页元素2：上图下文布局 音乐卡片（带图片）-->
+    <section>
+        <h2 class="sec-title">热门音乐推荐</h2>
+        <div class="card-wrap">
+            <article class="music-card">
+                <div class="card-img">
+                    <!--替换为你的封面图片，无图则显示灰色背景-->
+                    <img src="" alt="音乐封面">
+                </div>
+                <div class="card-text">
+                    <h4>晚风与星河</h4>
+                    <p>歌手：示例歌手A | 流行</p>
+                </div>
+            </article>
+            <article class="music-card">
+                <div class="card-img">
+                    <img src="" alt="音乐封面">
+                </div>
+                <div class="card-text">
+                    <h4>城市黄昏叙事曲</h4>
+                    <p>歌手：示例歌手B | 民谣</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!--网页元素3：左图右文布局 歌手介绍（带图片）-->
+    <section>
+        <h2 class="sec-title">人气歌手</h2>
+        <div class="singer-item">
+            <div class="singer-pic">
+                <img src="" alt="歌手头像">
+            </div>
+            <div class="singer-desc">
+                <h3>原创音乐人-小乐</h3>
+                <p>擅长流行、民谣曲风，代表作品《晚风与星河》，用温柔歌声讲述城市故事，收获大量听众喜爱。</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

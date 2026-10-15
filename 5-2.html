@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>盒模型、框模型、box model</title>
+    <style>
+        body,ul,p,h1,h2,h3,h4,h5,h6{
+            margin: 0;
+            padding: 0;
+        }
+        ul{
+            list-style: none;
+        }
+        .a{
+            width: 500px;
+            height: 500px;
+            border: 2px dotted red;
+            padding: 70px 60px 50px 40px;
+            margin: 40px auto;
+        }
+        /* 盒子的高度：内容的高度+上下边框的高度+上下padding的高度+上下margin的高度 */
+        .b{
+            width: 500px;
+            height: 300px;
+            border: 2px dashed red;
+            margin: 50px auto;
+        }
+        .c{
+            width: 500px;
+            height: 300px;
+            border: 2px solid red;
+            padding: 70px 0px 50px 0px ;
+            margin: 50px auto;
+            box-sizing: content-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="a">313 姚明涛</div>
+    <div class="b">313 姚明涛</div>
+    <div class="c">313 姚明涛</div>
+    
+</body>
+</html>

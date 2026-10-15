@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        img{
+            display: block;
+        } 
+        ul,ol{list-style:none;}
+        .tlist{
+            display: flex;
+            flex-wrap: wrap;
+
+        }
+        .tlist li{
+            width: 30%;
+            margin: 3px;
+            flex-grow: 2;
+            overflow: hidden;
+            position: relative;
+
+           
+
+        }
+        .tlist  img{
+            width: 100%;
+            tansition: all 0.5s ease;
+
+        }
+        .text{
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+          transition: all 0.5s ease;
+            height: 33px;
+            font-size: 12px;
+
+        }
+        .text h3{
+            height: 33px;
+            line-height: 33px;
+            text-align: center;
+
+          
+        }
+        .text p{
+            
+        }
+        .tlist li:nth-child(3n+1) :hover .img{
+            transform: scale(1.7);
+        }
+     </style>
+</head>
+<body>
+    <h2>transition 过渡</h2>
+    <ul class="tlist">
+        <li>
+            <img src="./img/img.jpg">
+            <div class="text">
+                <h3>姚明涛的标题1</h3>
+                <p>姚明涛的内容</p>
+            </div>
+        </li>
+    </ul>
+     <ul class="tlist">
+        <li>
+            <img src="./img/img2.jpg">
+            <div class="text">
+                <h3>姚明涛的标题2</h3>
+                <p>姚明涛的内容</p>
+            </div>
+        </li>
+    </ul>
+     <ul class="tlist">
+        <li>
+            <img src="./img/img3.jpg">
+            <div class="text">
+                <h3>姚明涛的标题3</h3>
+                <p>姚明涛的内容</p>
+            </div>
+        </li>
+    </ul>
+</body>
+</html>

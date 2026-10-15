@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>313 姚明涛</title>
+    <style>
+        /* 定义CSS变量：一般写在:root根元素上 */
+        :root{
+            --main-color: #034;        /* 主色调 */
+            --bg-color: #f5f5f5;       /* 背景色 */
+            --font-size: 16px;         /* 字号 */
+            --border-color: #ccc;      /* 边框颜色 */
+            --radius: 8px;             /* 圆角 */
+        }
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            /* 使用变量 */
+            background-color: var(--bg-color);
+            font-size: var(--font-size);
+            color: #333;
+        }
+        h2{
+            background: var(--main-color);
+            color: #fff;
+            text-align: center;
+            line-height: 150%;
+            letter-spacing: 3px;
+            padding: 10px 0;
+        }
+        .box{
+            width: 480px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: #fff;
+        }
+        .box h3{
+            color: var(--main-color);
+            font-size: calc(var(--font-size) * 1.25);
+            margin-bottom: 10px;
+        }
+        .box p{
+            line-height: 180%;
+            text-indent: 2em;
+        }
+        .btn{
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 20px;
+            /* 变量未定义时的默认值：第二个参数 */
+            color: var(--btn-color, #fff);
+            background: var(--main-color);
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+        }
+        /* 局部修改变量：只影响class="dark"内的元素 */
+        .dark{
+            --main-color: #c00;
+            --bg-color: #eee;
+        }
+        .info{
+            color: var(--main-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h2>CSS变量（自定义属性）</h2>
+    <div class="box">
+        <h3>CSS进阶：变量</h3>
+        <p>学号：<span class="info">313</span>，姓名：<span class="info">姚明涛</span>，班级：<span class="info">计算机24003</span>，
+            本实例的知识点：<span class="info">CSS变量 var() 的定义与使用</span>
+        </p>
+        <p>在:root中定义 --main-color、--bg-color 等变量，再用 var() 引用；修改一处即可全局更新。文字：姚明涛</p>
+        <button class="btn">姚明涛的按钮</button>
+    </div>
+    <div class="box dark">
+        <h3>局部修改变量</h3>
+        <p>姓名：<span class="info">姚明涛</span>，此区域重新定义了 --main-color 和 --bg-color，变量只在 .dark 内生效。</p>
+        <button class="btn">姚明涛的按钮2</button>
+    </div>
+</body>
+</html>

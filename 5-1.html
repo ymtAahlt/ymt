@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=2">
+    <title>313 姚明涛</title>
+    <!-- 后定义的样式会覆盖之前定义的样式 -->
+    <link rel="stylesheet" href="css.css">
+    <style>
+        .text{
+            color:violet!important;
+            /* hack,优先级大于内嵌css */
+        }
+        #box p{
+            color:silver;
+        }
+        .box{
+            color:purple;;
+        }
+        #text{ 
+            color: yellow;
+        }
+        .text{
+            color: blue;
+        }
+        p{
+            color: red;
+            font-size: 60px;
+        }
+        /* 优先级 id>class>tag */
+        /* body #box #text .text */
+    </style>
+    
+</head>
+<body>
+    <h2>层叠与继承</h2>
+    <div id = "box" class = "box">
+        <p id = "text" class = "text">313 姚明涛</p>
+        <p>CSS 选择器的优先级</p>
+    </div>
+    
+</body>
+</html>

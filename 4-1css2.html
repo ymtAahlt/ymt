@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>313 姚明涛</title>
+    <style>
+        h2,h3,p{
+            padding:0;
+            margin:0;
+        }/*群组选择器*/
+        #box{
+            padding:8px;
+            margin:20px;
+            border:1px solid #ccc;
+            font-size: 12px;
+            width:480px;
+        }
+        #box h3{
+            /* 字体大小16px */
+            font-size: 16px;
+            /* 行高33px */
+            line-height: 33px;
+            /* 居中 */
+            text-align: center;
+            /* 颜色#034 */
+            color: #034;
+            /* 字间距3px */
+            letter-spacing: 3px;
+        }
+        #box>p{
+            /* 行高150% */
+            line-height: 150%;
+            /* 颜色#666 */
+            color: #666;
+            /* 首行空两个格 */
+            text-indent: 2em;
+        }
+        #box a{
+             /* 颜色#c00 */
+            color: #c00;
+            /* 下划线 */
+            text-decoration: underline;
+        }
+        /* h2黑底白字，居中，行高150% */
+h2 {
+  background: #000;
+  color: #fff;
+  text-align: center;   /* 新增：h2居中 */
+  line-height: 150%;    /* 新增：行高150% */
+}
+/* 学号、姓名、班级：蓝色加粗（1个群组选择器，共用class="info"） */
+.info {
+  color: blue;
+  font-weight: bold;
+}
+/* 知识点的值：蓝底白字 */
+.know {
+  background: blue;
+  color: white;
+}
+        
+    </style>
+</head>
+<body>
+    <h2>css群组选择器和后代选择器</h2>
+    <div id="box">
+        <h3>CSS进阶<span class="white-text">选择器</span></h3>
+        <p>学号：<span class="info">313</span>，姓名：<span class="info">姚明涛</span>，班级：<span class="info">计算机24003</span>，《高级网页设计》的学习难度：一般，
+本实例的知识点：<span class="know">css群组选择器和后代选择器</span>
+            <a href="#">【更多】</a>
+        </p>
+        
+    </div>
+    <!-- 扩展：学号、姓名、班级的值是蓝色加粗，使用1个css选择器
+     h2黑底白字居中行高150%
+     知识点的值蓝底白字 -->
+
+</body>
+</html>

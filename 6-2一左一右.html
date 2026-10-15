@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一左一右</title>
+    <style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+        .title{
+            width: 500px;
+            height: 33px;
+            line-height: 33px;
+            padding: left 16px; 
+            margin: 50px ;
+         }
+        .title h2{
+            font-size: 14px;
+            color: #039;
+         }
+        .title a{ 
+            font-size: 12px;
+            color: #999;
+            text-decoration: none;
+        }
+        .title:first-child{
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+        }
+        .title:nth-child(2){ 
+            display: flex;
+            border-top:2px solid #ccc;
+        }
+        .title:nth-child(3){ 
+            position: relative;
+            border: bottom 2px solid #039;
+        }
+        .title:nth-child(3)a{
+        position: absolute;
+        right :16px;
+        top:0;
+        }
+      
+    </style>
+</head>
+<body>
+    <div class="title">
+    <h2>姚明涛的标题</h2>
+    <a href="#">更多</a>
+    </div>
+
+    <div class="title">
+    <h2>姚明涛的标题</h2>
+    <a href="#">更多</a>
+    </div>
+
+    <div class="title">
+    <h2>姚明涛的标题</h2>
+    <a href="#">更多</a>
+    </div>
+
+</body>
+</html>
