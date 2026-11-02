@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>17-5 JavaScript 定时器</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --panel: #ffffff;
+            --primary: #0b5fff;
+            --primary-dark: #00359e;
+            --accent: #dfeaff;
+            --text: #22304a;
+            --muted: #64748b;
+            --border: #dfe7f5;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warn: #d97706;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef5ff 0%, #f9fbff 100%);
+            color: var(--text);
+        }
+
+        .container {
+            width: min(1100px, calc(100% - 32px));
+            margin: 40px auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 18px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+        }
+
+        .header p {
+            margin: 0;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            margin-top: 24px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            margin: 0 0 16px;
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        .demo {
+            background: #fafcff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .demo h3 {
+            margin: 0 0 6px;
+            font-size: 1.05rem;
+            color: var(--primary-dark);
+        }
+
+        .demo .desc {
+            font-size: 0.88rem;
+            color: var(--muted);
+            margin-bottom: 14px;
+            line-height: 1.6;
+        }
+
+        /* ============ setInterval 计时器 ============ */
+        .timer-display {
+            text-align: center;
+            padding: 22px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-radius: 14px;
+            color: #22d3ee;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-bottom: 14px;
+        }
+
+        .countdown-display {
+            text-align: center;
+            padding: 22px;
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            border-radius: 14px;
+            color: #fbbf24;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 14px;
+            transition: color 0.2s;
+        }
+
+        .countdown-display.done { color: #22d3ee; }
+        .countdown-display.warn { color: #f97316; }
+        .countdown-display.danger { color: #ef4444; }
+
+        /* ============ setTimeout 延时 ============ */
+        .delayed-box {
+            min-height: 90px;
+            background: #fef3c7;
+            border: 1px dashed #f59e0b;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #78350f;
+            font-size: 0.95rem;
+            padding: 14px;
+            text-align: center;
+            margin-bottom: 14px;
+            transition: all 0.3s;
+        }
+
+        .delayed-box.active {
+            background: #dcfce7;
+            border: 1px solid #22c55e;
+            color: #14532d;
+            font-weight: 700;
+            animation: pulse 0.5s ease 2;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+
+        /* ============ 按钮 ============ */
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 9px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-start { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(22,163,74,0.25); }
+        .btn-pause { background: var(--warn); color: white; box-shadow: 0 4px 12px rgba(217,119,6,0.25); }
+        .btn-stop  { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(220,38,38,0.25); }
+        .btn-ghost { background: var(--accent); color: var(--primary-dark); }
+
+        /* ============ 任务调度日志 ============ */
+        .log-box {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 14px;
+            font-family: Consolas, monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            max-height: 220px;
+            overflow-y: auto;
+            margin-top: 14px;
+        }
+
+        .log-box .log-line { white-space: pre-wrap; }
+        .log-box .log-time { color: #94a3b8; }
+        .log-box .log-info { color: #60a5fa; }
+        .log-box .log-ok   { color: #4ade80; }
+        .log-box .log-warn { color: #fbbf24; }
+        .log-box .log-err  { color: #f87171; }
+
+        /* ============ 概念说明 ============ */
+        .concept {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        @media (max-width: 820px) { .concept { grid-template-columns: 1fr; } }
+
+        .concept .box {
+            border-radius: 12px;
+            padding: 16px 18px;
+        }
+        .concept .box.periodic { background: #e0f2fe; border-left: 4px solid #0ea5e9; }
+        .concept .box.delayed  { background: #fef3c7; border-left: 4px solid #f59e0b; }
+
+        .concept h4 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+        }
+
+        .concept p {
+            margin: 4px 0;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        .concept code {
+            background: rgba(255,255,255,0.6);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: Consolas, monospace;
+            color: var(--primary-dark);
+        }
+
+        pre.code {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 0.82rem;
+            font-family: Consolas, monospace;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 10px 0 0;
+        }
+
+        .footer {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            text-align: center;
+        }
+    </style>
+    <link rel="stylesheet" href="font/remixicon.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>JavaScript 定时器</h1>
+            <p>JavaScript 内置了两种定时器：<strong>setTimeout</strong>（单次延时执行）与 <strong>setInterval</strong>（周期性重复执行）。下面通过几个可交互的小演示直观展示它们的用法与区别。</p>
+        </header>
+
+        <!-- 概念说明 -->
+        <section class="card">
+            <h2>概念对比</h2>
+            <div class="concept">
+                <div class="box periodic">
+                    <h4><i class="ri-refresh-line"></i> setInterval — 重复执行</h4>
+                    <p>每隔指定毫秒数执行一次回调函数，持续运行直到被清除。</p>
+                    <pre class="code">let id = setInterval(fn, 1000);
+// ...
+clearInterval(id); // 停止</pre>
+                </div>
+                <div class="box delayed">
+                    <h4><i class="ri-time-line"></i> setTimeout — 延时一次</h4>
+                    <p>在指定毫秒数后仅执行一次回调函数，执行完就结束（除非递归自己再次调用）。</p>
+                    <pre class="code">let id = setTimeout(fn, 2000);
+// ...
+clearTimeout(id); // 取消</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- 演示区 -->
+        <section class="card">
+            <h2>交互演示</h2>
+            <div class="grid-2">
+                <!-- 演示1：setInterval 数字时钟 -->
+                <div class="demo">
+                    <h3>① setInterval — 实时时钟</h3>
+                    <p class="desc">每隔 1000ms 执行一次，每秒刷新页面上的时间。</p>
+                    <div id="clockDisplay" class="timer-display">--:--:--</div>
+                    <div class="btn-row">
+                        <button id="clockStart" class="btn btn-start"><i class="ri-play-fill"></i>启动</button>
+                        <button id="clockPause" class="btn btn-pause"><i class="ri-pause-fill"></i>暂停</button>
+                        <button id="clockStop" class="btn btn-stop"><i class="ri-stop-fill"></i>停止</button>
+                    </div>
+                </div>
+
+                <!-- 演示2：setInterval 倒计时 -->
+                <div class="demo">
+                    <h3>② setInterval — 倒计时</h3>
+                    <p class="desc">点击开始后，每秒 -1，到 0 时自动清除 interval。</p>
+                    <div id="cdDisplay" class="countdown-display">10</div>
+                    <div class="btn-row">
+                        <button id="cdStart" class="btn btn-start"><i class="ri-play-fill"></i>开始 10 秒倒计时</button>
+                        <button id="cdReset" class="btn btn-ghost"><i class="ri-refresh-line"></i>重置</button>
+                    </div>
+                </div>
+
+                <!-- 演示3：setTimeout 延时弹出提示 -->
+                <div class="demo">
+                    <h3>③ setTimeout — 延时任务</h3>
+                    <p class="desc">设置一个延时 3 秒后触发的任务，可以被取消。</p>
+                    <div id="delayedBox" class="delayed-box">点击"启动延时"按钮后，3 秒内将显示这里 🕒</div>
+                    <div class="btn-row">
+                        <button id="delayStart" class="btn btn-start"><i class="ri-time-line"></i>启动 3 秒延时</button>
+                        <button id="delayCancel" class="btn btn-stop"><i class="ri-close-circle-line"></i>取消</button>
+                    </div>
+                </div>
+
+                <!-- 演示4：链式 setTimeout -->
+                <div class="demo">
+                    <h3>④ 链式 setTimeout — 分步动画</h3>
+                    <p class="desc">手动让 setTimeout 自己再调自己，可以实现"依次延时 1s、2s、3s…"的分步效果。</p>
+                    <div id="chainBox" class="delayed-box">还未启动，点击下方按钮。</div>
+                    <div class="btn-row">
+                        <button id="chainStart" class="btn btn-start"><i class="ri-seedling-line"></i>执行分步动画</button>
+                        <button id="chainCancel" class="btn btn-stop"><i class="ri-close-circle-line"></i>中断</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 日志 -->
+            <h2 style="margin-top:24px;">调度日志</h2>
+            <div id="logBox" class="log-box">
+                <div class="log-line"><span class="log-time">[系统]</span> 页面已就绪，等待操作…</div>
+            </div>
+        </section>
+
+        <div class="footer">
+            提示：定时器在浏览器后台标签页中会被节流，以节省 CPU 资源。
+        </div>
+    </div>
+
+    <script>
+        // ========== 日志工具 ==========
+        const logBox = document.getElementById('logBox');
+        function log(msg, type) {
+            const d = new Date();
+            const ts = ('0' + d.getHours()).slice(-2) + ':' +
+                       ('0' + d.getMinutes()).slice(-2) + ':' +
+                       ('0' + d.getSeconds()).slice(-2) + '.' +
+                       ('00' + d.getMilliseconds()).slice(-3);
+            const cls = type === 'ok' ? 'log-ok' :
+                        type === 'warn' ? 'log-warn' :
+                        type === 'err' ? 'log-err' : 'log-info';
+            const div = document.createElement('div');
+            div.className = 'log-line';
+            div.innerHTML = '<span class="log-time">[' + ts + ']</span> <span class="' + cls + '">' + msg + '</span>';
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // ========== 演示1：setInterval 时钟 ==========
+        const clockDisplay = document.getElementById('clockDisplay');
+        let clockId = null;
+
+        function fmt(d) {
+            return ('0' + d.getHours()).slice(-2) + ':' +
+                   ('0' + d.getMinutes()).slice(-2) + ':' +
+                   ('0' + d.getSeconds()).slice(-2);
+        }
+
+        document.getElementById('clockStart').addEventListener('click', function () {
+            if (clockId !== null) { log('时钟已在运行', 'warn'); return; }
+            clockDisplay.textContent = fmt(new Date());
+            clockId = setInterval(function () {
+                clockDisplay.textContent = fmt(new Date());
+            }, 1000);
+            log('启动 setInterval（1000ms），ID=' + clockId);
+        });
+
+        document.getElementById('clockPause').addEventListener('click', function () {
+            if (clockId === null) { log('时钟未运行', 'warn'); return; }
+            clearInterval(clockId);
+            log('暂停时钟：clearInterval(' + clockId + ')', 'ok');
+            clockId = null;
+        });
+
+        document.getElementById('clockStop').addEventListener('click', function () {
+            if (clockId === null) { log('时钟已停止', 'warn'); return; }
+            clearInterval(clockId);
+            log('停止时钟：clearInterval(' + clockId + ')', 'ok');
+            clockId = null;
+            clockDisplay.textContent = '--:--:--';
+        });
+
+        // ========== 演示2：setInterval 倒计时 ==========
+        const cdDisplay = document.getElementById('cdDisplay');
+        let cdId = null;
+        let cdValue = 10;
+
+        function updateCD() {
+            cdDisplay.textContent = cdValue;
+            cdDisplay.classList.remove('done', 'warn', 'danger');
+            if (cdValue === 0) cdDisplay.classList.add('done');
+            else if (cdValue <= 3) cdDisplay.classList.add('danger');
+            else if (cdValue <= 6) cdDisplay.classList.add('warn');
+        }
+
+        document.getElementById('cdStart').addEventListener('click', function () {
+            if (cdId !== null) { log('倒计时已在运行', 'warn'); return; }
+            cdValue = 10;
+            updateCD();
+            cdId = setInterval(function () {
+                cdValue--;
+                updateCD();
+                log('倒计时=' + cdValue + 's');
+                if (cdValue <= 0) {
+                    clearInterval(cdId);
+                    log('倒计时结束，已自动 clearInterval(' + cdId + ')', 'ok');
+                    cdId = null;
+                }
+            }, 1000);
+            log('启动倒计时 setInterval（1000ms），ID=' + cdId);
+        });
+
+        document.getElementById('cdReset').addEventListener('click', function () {
+            if (cdId !== null) {
+                clearInterval(cdId);
+                log('手动重置，clearInterval(' + cdId + ')', 'ok');
+                cdId = null;
+            }
+            cdValue = 10;
+            updateCD();
+        });
+
+        // ========== 演示3：setTimeout 延时 ==========
+        const delayedBox = document.getElementById('delayedBox');
+        let delayId = null;
+
+        document.getElementById('delayStart').addEventListener('click', function () {
+            if (delayId !== null) { log('已有延时任务在排队', 'warn'); return; }
+            delayedBox.classList.remove('active');
+            delayedBox.textContent = '⏳ 3 秒倒计时中…';
+            log('启动 setTimeout（3000ms）');
+            delayId = setTimeout(function () {
+                delayedBox.classList.add('active');
+                delayedBox.textContent = '✅ 延时任务触发！此时 ' + fmt(new Date()) + ' 正好是 3 秒后。';
+                log('setTimeout 触发，ID=' + delayId, 'ok');
+                delayId = null;
+            }, 3000);
+            log('setTimeout ID=' + delayId + '，3 秒后执行');
+        });
+
+        document.getElementById('delayCancel').addEventListener('click', function () {
+            if (delayId === null) { log('没有可取消的延时任务', 'warn'); return; }
+            clearTimeout(delayId);
+            log('取消延时：clearTimeout(' + delayId + ')', 'ok');
+            delayId = null;
+            delayedBox.classList.remove('active');
+            delayedBox.textContent = '❌ 延时任务已被取消';
+        });
+
+        // ========== 演示4：链式 setTimeout ==========
+        const chainBox = document.getElementById('chainBox');
+        let chainId = null;
+
+        document.getElementById('chainStart').addEventListener('click', function () {
+            if (chainId !== null) { log('动画已在运行', 'warn'); return; }
+            log('启动分步动画：链式 setTimeout 1s → 2s → 3s → 4s → 5s');
+            const steps = [
+                { t: 1000, msg: '🌱 第 1 步：种子种下' },
+                { t: 2000, msg: '🌿 第 2 步：发芽' },
+                { t: 3000, msg: '🌳 第 3 步：长出枝干' },
+                { t: 4000, msg: '🌸 第 4 步：开花' },
+                { t: 5000, msg: '🍎 第 5 步：结果' }
+            ];
+
+            let i = 0;
+            function next() {
+                if (i >= steps.length) {
+                    chainBox.classList.add('active');
+                    log('分步动画完成 ✅', 'ok');
+                    chainId = null;
+                    return;
+                }
+                const step = steps[i];
+                chainId = setTimeout(function () {
+                    chainBox.textContent = step.msg + ' (' + fmt(new Date()) + ')';
+                    log('第 ' + (i + 1) + ' 步触发，延时 ' + step.t + 'ms', 'ok');
+                    i++;
+                    next(); // 链式调用自己
+                }, i === 0 ? step.t : (step.t - steps[i - 1].t));
+                // 注：i===0 用 1s，后面每一步用"距离上一次的增量"
+            }
+            chainBox.classList.remove('active');
+            chainBox.textContent = '⏳ 动画进行中…';
+            next();
+        });
+
+        document.getElementById('chainCancel').addEventListener('click', function () {
+            if (chainId === null) { log('没有可中断的动画', 'warn'); return; }
+            clearTimeout(chainId);
+            log('中断分步动画：clearTimeout(' + chainId + ')', 'err');
+            chainId = null;
+            chainBox.classList.remove('active');
+            chainBox.textContent = '❌ 动画已被中断';
+        });
+    </script>
+</body>
+</html>

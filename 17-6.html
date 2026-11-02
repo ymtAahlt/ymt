@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>17-6 包饺子异步流程</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --panel: #ffffff;
+            --primary: #0b5fff;
+            --primary-dark: #00359e;
+            --accent: #dfeaff;
+            --text: #22304a;
+            --muted: #64748b;
+            --border: #dfe7f5;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --success: #16a34a;
+            --warn: #d97706;
+            --running: #0284c7;
+            --race-a: #6366f1;
+            --race-b: #ec4899;
+            --all-a: #0ea5e9;
+            --all-b: #14b8a6;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef5ff 0%, #f9fbff 100%);
+            color: var(--text);
+        }
+
+        .container {
+            width: min(1180px, calc(100% - 32px));
+            margin: 40px auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 18px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+        }
+
+        .header p {
+            margin: 0;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            margin-top: 24px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            margin: 0 0 16px;
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+        }
+
+        /* ============ 启动按钮 ============ */
+        .ctrl {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-start { background: var(--success); color: white; box-shadow: 0 4px 14px rgba(22,163,74,0.3); }
+        .btn-reset { background: var(--warn); color: white; box-shadow: 0 4px 14px rgba(217,119,6,0.3); }
+
+        /* ============ 时间线 ============ */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .lane {
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            gap: 14px;
+            padding: 12px 0 12px 0;
+        }
+
+        .lane:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 21px;
+            top: 52px;
+            bottom: -2px;
+            width: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            transition: background 0.3s;
+        }
+
+        .lane.done:not(:last-child)::after { background: var(--success); }
+        .lane.running:not(:last-child)::after { background: linear-gradient(180deg, var(--running) 0%, var(--border) 100%); }
+
+        .dot {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: var(--muted);
+            border: 3px solid #cbd5e1;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .lane.running .dot {
+            background: var(--running);
+            color: white;
+            border-color: #0369a1;
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+
+        .lane.done .dot {
+            background: var(--success);
+            color: white;
+            border-color: #15803d;
+        }
+
+        .lane.future .dot {
+            background: #f1f5f9;
+            color: #cbd5e1;
+            border-color: #e2e8f0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(2,132,199,0.45); }
+            50% { box-shadow: 0 0 0 10px rgba(2,132,199,0); }
+        }
+
+        .content {
+            flex: 1;
+            border-radius: 12px;
+            padding: 14px 18px;
+            background: #fafcff;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .lane.running .content { border-color: var(--running); background: #f0f9ff; }
+        .lane.done .content { border-color: #bbf7d0; background: #f0fdf4; }
+        .lane.future .content { opacity: 0.7; }
+
+        .content .title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin: 0 0 4px;
+        }
+
+        .content .sub {
+            font-size: 0.88rem;
+            color: var(--muted);
+            margin: 0 0 8px;
+        }
+
+        .content .status {
+            display: inline-block;
+            font-size: 0.78rem;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+            background: #e2e8f0;
+            color: var(--muted);
+        }
+
+        .lane.running .status { background: #bae6fd; color: #075985; }
+        .lane.done .status { background: #bbf7d0; color: #166534; }
+
+        /* ============ 子任务分支（race / all） ============ */
+        .branches {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .branch {
+            flex: 1;
+            min-width: 160px;
+            border-radius: 10px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            background: white;
+            font-size: 0.85rem;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .branch .b-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .branch .b-log {
+            font-family: Consolas, monospace;
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .branch .bar {
+            margin-top: 6px;
+            height: 5px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .branch .bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.15s linear;
+        }
+
+        .branch.active .bar-fill { animation: none; }
+        .branch.raceA { border-left: 4px solid var(--race-a); }
+        .branch.raceA .bar-fill { background: var(--race-a); }
+        .branch.raceB { border-left: 4px solid var(--race-b); }
+        .branch.raceB .bar-fill { background: var(--race-b); }
+        .branch.allA  { border-left: 4px solid var(--all-a); }
+        .branch.allA  .bar-fill { background: var(--all-a); }
+        .branch.allB  { border-left: 4px solid var(--all-b); }
+        .branch.allB  .bar-fill { background: var(--all-b); }
+
+        .branch.done { background: #f0fdf4; border-color: #bbf7d0; }
+        .branch.running { background: #f0f9ff; border-color: #bae6fd; }
+        .branch.cancelled { opacity: 0.5; background: #f1f5f9; text-decoration: line-through; }
+
+        .gate-label {
+            display: inline-block;
+            font-size: 0.72rem;
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-left: 6px;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+
+        .gate-label.all { background: #0ea5e9; }
+        .gate-label.race { background: #8b5cf6; }
+
+        /* ============ 日志 ============ */
+        .log-box {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 14px;
+            padding: 14px;
+            font-family: Consolas, monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .log-box .lt { color: #94a3b8; }
+        .log-box .li { color: #60a5fa; }
+        .log-box .lo { color: #4ade80; }
+        .log-box .lw { color: #fbbf24; }
+        .log-box .le { color: #f87171; }
+
+        /* ============ 流程图 ============ */
+        .flow {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            font-family: Consolas, monospace;
+            font-size: 0.82rem;
+            color: #334155;
+            line-height: 1.8;
+        }
+
+        .flow code {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 0 6px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+        }
+
+        .footer {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🥟 包饺子 — Promise & async/await 异步流程</h1>
+            <p>用 <strong>setTimeout</strong> 模拟耗时，用 <strong>Promise.race</strong> 实现"线上线下同时买原料，任一完成即可"，用 <strong>Promise.all</strong> 实现"和面和馅都完成后才能包饺子"，其他步骤使用 <strong>async/await</strong> 顺序串行执行。</p>
+        </header>
+
+        <!-- 流程图说明 -->
+        <section class="card">
+            <h2>流程拓扑</h2>
+            <div class="flow">
+                <code>买原料 ─ Promise.race(网上下单, 线下超市) ─ 任一完成即通过</code><br>
+                <code>&nbsp;&nbsp;↓</code><br>
+                <code>取原料 (3s)</code><br>
+                <code>&nbsp;&nbsp;↓</code><br>
+                <code>和面 (5s) ─┐</code><br>
+                <code>和馅 (7s) ─┘ Promise.all 必须<strong>全部</strong>完成</code><br>
+                <code>&nbsp;&nbsp;↓</code><br>
+                <code>包饺子 (6s) → 煮饺子 (4s) → 吃饺子 🥟</code>
+            </div>
+        </section>
+
+        <!-- 控制面板 -->
+        <section class="card">
+            <div class="ctrl">
+                <button id="startBtn" class="btn btn-start"><i class="ri-play-circle-fill"></i>开始包饺子</button>
+                <button id="resetBtn" class="btn btn-reset" disabled><i class="ri-refresh-line"></i>重置</button>
+                <span id="timer" style="margin-left:auto;font-weight:700;color:var(--primary-dark);font-family:Consolas,monospace;font-size:1.1rem;"></span>
+            </div>
+
+            <div class="timeline" id="timeline">
+                <!-- 由 JS 动态渲染 -->
+            </div>
+        </section>
+
+        <!-- 日志 -->
+        <section class="card">
+            <h2>运行日志</h2>
+            <div id="logBox" class="log-box">
+                <div class="lt">[系统] 点击"开始包饺子"按钮启动流程…</div>
+            </div>
+        </section>
+
+        <div class="footer">
+            提示：<code>Promise.race</code> 取最先解决的那个；<code>Promise.all</code> 要全部解决才会继续。
+        </div>
+    </div>
+
+    <script>
+        // ========== 步骤定义 ==========
+        // type: serial | race | all
+        // race / all 会渲染子分支
+        const STEPS = [
+            {
+                id: 'buy', emoji: '🛒', title: '买原料',
+                sub: '线上线下同时下单，任一线先到即可开始下一步',
+                type: 'race',
+                branches: [
+                    { key: 'online',  name: '网上下单 📦', cost: 6000, color: 'raceA' },
+                    { key: 'offline', name: '线下超市 🛍️', cost: 5000, color: 'raceB' }
+                ]
+            },
+            {
+                id: 'pick', emoji: '🏠', title: '取原料',
+                sub: '去菜鸟驿站 / 厨房把原料拿过来',
+                type: 'serial', cost: 3000
+            },
+            {
+                id: 'mix', emoji: '🥣', title: '和面 & 和馅',
+                sub: '两个任务<strong>同时</strong>进行，必须全部完成才能包饺子',
+                type: 'all',
+                branches: [
+                    { key: 'dough', name: '和面 🌾', cost: 5000, color: 'allA' },
+                    { key: 'fill',  name: '和馅 🥬', cost: 7000, color: 'allB' }
+                ]
+            },
+            {
+                id: 'wrap', emoji: '🥟', title: '包饺子',
+                sub: '一个一个捏，形状要好看',
+                type: 'serial', cost: 6000
+            },
+            {
+                id: 'boil', emoji: '🍲', title: '煮饺子',
+                sub: '水开下锅，飘起来就差不多了',
+                type: 'serial', cost: 4000
+            },
+            {
+                id: 'eat', emoji: '😋', title: '吃饺子',
+                sub: '开动！',
+                type: 'serial', cost: 3000
+            }
+        ];
+
+        // ========== 状态 ==========
+        let state = {};
+        let startTS = 0;
+        let running = false;
+        let rafId = null;
+
+        // ========== DOM 渲染 ==========
+        const timelineEl = document.getElementById('timeline');
+        const logBox = document.getElementById('logBox');
+        const timerEl = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function renderTimeline() {
+            timelineEl.innerHTML = STEPS.map(function (s, idx) {
+                const st = state[s.id] || 'future';
+                const cls = st;
+                let branchesHTML = '';
+                let gateHTML = '';
+                if (s.type === 'race') {
+                    gateHTML = '<span class="gate-label race">race · 任一</span>';
+                    branchesHTML = s.branches.map(function (b) {
+                        const bs = (state[s.id + ':' + b.key] || 'future');
+                        const prog = (state[s.id + ':' + b.key + ':progress'] || 0);
+                        const cancelled = (state[s.id + ':' + b.key + ':cancelled'] === true);
+                        const clsB = cancelled ? 'cancelled' : bs;
+                        return '<div class="branch ' + b.color + ' ' + clsB + '">' +
+                            '<div class="b-title">' + b.name + '</div>' +
+                            '<div class="b-log">' + (bs === 'done' ? '✅ 完成' : cancelled ? '⏭️ 被 race 跳过' : bs === 'running' ? '⏳ 进行中 ' + prog + '%' : '待开始') + '</div>' +
+                            '<div class="bar"><div class="bar-fill" style="width:' + prog + '%"></div></div>' +
+                        '</div>';
+                    }).join('');
+                    branchesHTML = '<div class="branches">' + branchesHTML + '</div>';
+                } else if (s.type === 'all') {
+                    gateHTML = '<span class="gate-label all">all · 全部</span>';
+                    branchesHTML = s.branches.map(function (b) {
+                        const bs = (state[s.id + ':' + b.key] || 'future');
+                        const prog = (state[s.id + ':' + b.key + ':progress'] || 0);
+                        return '<div class="branch ' + b.color + ' ' + bs + '">' +
+                            '<div class="b-title">' + b.name + '</div>' +
+                            '<div class="b-log">' + (bs === 'done' ? '✅ 完成' : bs === 'running' ? '⏳ 进行中 ' + prog + '%' : '待开始') + '</div>' +
+                            '<div class="bar"><div class="bar-fill" style="width:' + prog + '%"></div></div>' +
+                        '</div>';
+                    }).join('');
+                    branchesHTML = '<div class="branches">' + branchesHTML + '</div>';
+                }
+                return '<div class="lane ' + cls + '" data-step="' + idx + '">' +
+                    '<div class="dot">' + s.emoji + '</div>' +
+                    '<div class="content">' +
+                        '<div class="title">' + s.title + gateHTML + '</div>' +
+                        '<p class="sub">' + s.sub + '</p>' +
+                        '<span class="status">' +
+                            (st === 'done' ? '✅ 已完成' : st === 'running' ? '⏳ 进行中' : st === 'future' ? '⏸ 待开始' : st) +
+                        '</span>' +
+                        branchesHTML +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        function log(msg, cls) {
+            const d = new Date();
+            const ts = ('0' + d.getHours()).slice(-2) + ':' +
+                       ('0' + d.getMinutes()).slice(-2) + ':' +
+                       ('0' + d.getSeconds()).slice(-2) + '.' +
+                       ('00' + d.getMilliseconds()).slice(-3);
+            const div = document.createElement('div');
+            div.className = 'lt';
+            div.innerHTML = '[' + ts + '] ' + (cls ? '<span class="' + cls + '">' + msg + '</span>' : msg);
+            logBox.appendChild(div);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function updateTimer() {
+            if (!running) return;
+            const elapsed = (Date.now() - startTS) / 1000;
+            timerEl.textContent = '⏱ ' + elapsed.toFixed(2) + 's';
+            rafId = requestAnimationFrame(updateTimer);
+        }
+
+        // ========== 核心：Promise 工具 ==========
+
+        // 串行单步：返回 Promise，resolve 时表示完成；同时支持进度更新
+        function doStepSerial(step, label) {
+            return new Promise(function (resolve) {
+                state[step.id] = 'running';
+                renderTimeline();
+                log('开始：' + (label || step.title) + '  (' + step.cost / 1000 + 's)', 'li');
+
+                const t0 = Date.now();
+                function tick() {
+                    const p = Math.min(100, Math.round((Date.now() - t0) / step.cost * 100));
+                    state[step.id + ':progress'] = p;
+                    // 实时更新进度条
+                    const bar = document.querySelector('[data-step="' + STEPS.indexOf(step) + '"] .bar-fill');
+                    if (bar) bar.style.width = p + '%';
+                    if (p < 100) {
+                        requestAnimationFrame(tick);
+                    } else {
+                        state[step.id] = 'done';
+                        state[step.id + ':progress'] = 100;
+                        renderTimeline();
+                        log('完成：' + (label || step.title), 'lo');
+                        resolve();
+                    }
+                }
+                // 用 setTimeout 控制总时长，tick 做进度显示
+                setTimeout(function () {
+                    tick();
+                }, 1);
+                // 兜底：setTimeout 到期强制结束
+                setTimeout(function () {
+                    state[step.id] = 'done';
+                    state[step.id + ':progress'] = 100;
+                    renderTimeline();
+                    resolve();
+                }, step.cost + 50);
+            });
+        }
+
+        // 子任务（给 race / all 用）
+        function doBranch(step, b) {
+            return new Promise(function (resolve) {
+                state[step.id + ':' + b.key] = 'running';
+                renderTimeline();
+                log('  ⏳ ' + b.name + ' 启动 (' + b.cost / 1000 + 's)', 'li');
+
+                const t0 = Date.now();
+                function tick() {
+                    const p = Math.min(100, Math.round((Date.now() - t0) / b.cost * 100));
+                    state[step.id + ':' + b.key + ':progress'] = p;
+                    const idx = STEPS.indexOf(step);
+                    const allBars = document.querySelectorAll('[data-step="' + idx + '"] .branches .branch');
+                    const branchIdx = step.branches.findIndex(function (x) { return x.key === b.key; });
+                    if (allBars[branchIdx]) {
+                        const bar = allBars[branchIdx].querySelector('.bar-fill');
+                        if (bar) bar.style.width = p + '%';
+                    }
+                    if (p < 100) {
+                        requestAnimationFrame(tick);
+                    }
+                }
+                setTimeout(tick, 1);
+
+                setTimeout(function () {
+                    state[step.id + ':' + b.key] = 'done';
+                    state[step.id + ':' + b.key + ':progress'] = 100;
+                    renderTimeline();
+                    log('  ✅ ' + b.name + ' 完成', 'lo');
+                    resolve(b.key);
+                }, b.cost);
+            });
+        }
+
+        // Promise.race：任一完成即通过，其余标记 cancelled
+        async function doStepRace(step) {
+            state[step.id] = 'running';
+            renderTimeline();
+            log('🎬 开始 [' + step.title + '] — Promise.race（任一完成即通过）', 'lw');
+
+            const promises = step.branches.map(function (b) { return doBranch(step, b); });
+            const winner = await Promise.race(promises);
+
+            // 标记没完成的那些分支为"被跳过"
+            step.branches.forEach(function (b) {
+                if (b.key !== winner && state[step.id + ':' + b.key] !== 'done') {
+                    state[step.id + ':' + b.key + ':cancelled'] = true;
+                    state[step.id + ':' + b.key] = 'future';
+                    log('  ⏭️ ' + b.name + ' — 被 race 跳过（因为 ' + (step.branches.find(function (x) { return x.key === winner; }).name) + ' 先完成）', 'lw');
+                }
+            });
+
+            state[step.id] = 'done';
+            renderTimeline();
+            log('🏁 完成 [' + step.title + '] — 胜出：' + step.branches.find(function (x) { return x.key === winner; }).name, 'lo');
+        }
+
+        // Promise.all：所有分支必须都完成
+        async function doStepAll(step) {
+            state[step.id] = 'running';
+            renderTimeline();
+            log('🎬 开始 [' + step.title + '] — Promise.all（必须全部完成）', 'lw');
+
+            await Promise.all(step.branches.map(function (b) { return doBranch(step, b); }));
+
+            state[step.id] = 'done';
+            renderTimeline();
+            log('🏁 完成 [' + step.title + '] — 两路任务全部完成', 'lo');
+        }
+
+        // ========== 主流程（async/await 串起来） ==========
+        async function makeDumplings() {
+            running = true;
+            startTS = Date.now();
+            startBtn.disabled = true;
+            resetBtn.disabled = false;
+            log('🔥 包饺子流程启动！', 'lo');
+            updateTimer();
+
+            try {
+                for (let i = 0; i < STEPS.length; i++) {
+                    const step = STEPS[i];
+                    if (step.type === 'race') {
+                        await doStepRace(step);
+                    } else if (step.type === 'all') {
+                        await doStepAll(step);
+                    } else {
+                        await doStepSerial(step);
+                    }
+                }
+                log('🎉 包饺子流程全部完成！开吃 🥟🥟🥟', 'lo');
+            } catch (err) {
+                log('❌ 流程异常：' + (err && err.message ? err.message : String(err)), 'le');
+            } finally {
+                running = false;
+                if (rafId) cancelAnimationFrame(rafId);
+                startBtn.disabled = false;
+            }
+        }
+
+        // ========== 初始化 & 事件 ==========
+        function reset() {
+            state = {};
+            startTS = 0;
+            running = false;
+            if (rafId) cancelAnimationFrame(rafId);
+            timerEl.textContent = '';
+            logBox.innerHTML = '<div class="lt">[系统] 已重置，点击"开始包饺子"再次启动…</div>';
+            startBtn.disabled = false;
+            resetBtn.disabled = true;
+            renderTimeline();
+        }
+
+        startBtn.addEventListener('click', makeDumplings);
+        resetBtn.addEventListener('click', reset);
+
+        // 初始渲染
+        renderTimeline();
+    </script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>17-2 Fetch接口数据展示</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --panel: #ffffff;
+            --primary: #0b5fff;
+            --primary-dark: #00359e;
+            --accent: #dfeaff;
+            --text: #22304a;
+            --muted: #64748b;
+            --border: #dfe7f5;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef5ff 0%, #f9fbff 100%);
+            color: var(--text);
+        }
+
+        .container {
+            width: min(1100px, calc(100% - 32px));
+            margin: 40px auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 18px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+        }
+
+        .header p {
+            margin: 0;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: var(--primary-dark);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .status {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            margin-top: 24px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            margin: 0 0 16px;
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+        }
+
+        .loading, .error, .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .error { color: #dc2626; }
+
+        .spinner {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--accent);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .user-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .user-card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            background: #fafcff;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .user-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .user-card .name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 0 0 4px;
+        }
+
+        .user-card .username {
+            display: inline-block;
+            font-size: 0.82rem;
+            color: var(--muted);
+            background: var(--accent);
+            border-radius: 999px;
+            padding: 2px 10px;
+            margin-bottom: 10px;
+        }
+
+        .user-card .info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text);
+            margin: 6px 0;
+            word-break: break-all;
+        }
+
+        .user-card .info i {
+            color: var(--primary);
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        pre {
+            margin: 0;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 14px;
+            padding: 20px;
+            overflow-x: auto;
+            line-height: 1.7;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .footer {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            text-align: center;
+        }
+
+        .footer code {
+            background: var(--accent);
+            padding: 2px 8px;
+            border-radius: 6px;
+            color: var(--primary-dark);
+        }
+    </style>
+    <link rel="stylesheet" href="font/remixicon.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Fetch 接口数据展示</h1>
+            <p>本页面使用原生 <strong>fetch</strong> 请求一个支持跨域（CORS）的公开接口，并将返回的数据渲染到页面中。</p>
+            <div class="toolbar">
+                <button id="fetchBtn" class="btn btn-primary">
+                    <i class="ri-refresh-line"></i> 重新加载数据
+                </button>
+                <span id="status" class="status"></span>
+            </div>
+        </header>
+
+        <section class="card">
+            <h2>用户列表</h2>
+            <div id="userList">
+                <div class="loading"><span class="spinner"></span>正在加载数据，请稍候…</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>接口返回的原始 JSON</h2>
+            <pre id="rawJson">// 等待加载…</pre>
+        </section>
+
+        <div class="footer">
+            接口地址：<code>https://jsonplaceholder.typicode.com/users</code>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://jsonplaceholder.typicode.com/users';
+
+        const userListEl = document.getElementById('userList');
+        const rawJsonEl = document.getElementById('rawJson');
+        const statusEl = document.getElementById('status');
+        const fetchBtn = document.getElementById('fetchBtn');
+
+        function renderLoading() {
+            userListEl.innerHTML = '<div class="loading"><span class="spinner"></span>正在加载数据，请稍候…</div>';
+        }
+
+        function renderError(msg) {
+            userListEl.innerHTML = '<div class="error">加载失败：' + msg + '</div>';
+        }
+
+        function renderUsers(users) {
+            if (!Array.isArray(users) || users.length === 0) {
+                userListEl.innerHTML = '<div class="empty">暂无数据</div>';
+                return;
+            }
+
+            const html = users.map(function (u) {
+                const city = (u.address && u.address.city) || '—';
+                const email = u.email || '—';
+                const phone = u.phone || '—';
+                const website = u.website ? 'https://' + u.website : '#';
+                return '' +
+                    '<div class="user-card">' +
+                        '<p class="name">' + escapeHtml(u.name) + '</p>' +
+                        '<span class="username">@' + escapeHtml(u.username) + '</span>' +
+                        '<div class="info"><i class="ri-mail-line"></i><span>' + escapeHtml(email) + '</span></div>' +
+                        '<div class="info"><i class="ri-phone-line"></i><span>' + escapeHtml(phone) + '</span></div>' +
+                        '<div class="info"><i class="ri-map-pin-line"></i><span>' + escapeHtml(city) + '</span></div>' +
+                        '<div class="info"><i class="ri-global-line"></i><a href="' + website + '" target="_blank" rel="noopener">' + escapeHtml(u.website) + '</a></div>' +
+                    '</div>';
+            }).join('');
+
+            userListEl.innerHTML = '<div class="user-list">' + html + '</div>';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        async function loadUsers() {
+            fetchBtn.disabled = true;
+            statusEl.textContent = '请求中…';
+            renderLoading();
+
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                const data = await res.json();
+
+                renderUsers(data);
+                rawJsonEl.textContent = JSON.stringify(data, null, 2);
+                statusEl.textContent = '加载成功，共 ' + (Array.isArray(data) ? data.length : 0) + ' 条数据';
+            } catch (err) {
+                renderError(err.message || String(err));
+                statusEl.textContent = '加载失败';
+            } finally {
+                fetchBtn.disabled = false;
+            }
+        }
+
+        fetchBtn.addEventListener('click', loadUsers);
+        loadUsers();
+    </script>
+</body>
+</html>

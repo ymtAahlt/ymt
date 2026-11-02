@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 移动端视口：宽度=设备宽度，初始缩放1，全面屏支持 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>313 姚明涛</title>
+    <style>
+        :root{
+            --main-color: #034;
+            --bg-color: #f5f5f5;
+            --font-size: 16px;
+            --border-color: #ccc;
+            --radius: 8px;
+            --badge-color: #f53f3f;   /* 徽章/红点颜色 */
+            --nav-height: 56px;        /* 底部导航高度（固定值） */
+        }
+        *{ margin: 0; padding: 0; box-sizing: border-box; }
+        html{ -webkit-text-size-adjust: 100%; }
+        body{
+            background-color: var(--bg-color);
+            font-size: var(--font-size);
+            color: #333;
+            /* 给固定导航留出高度 + iPhone 底部安全区 */
+            padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 12px);
+        }
+        h2{
+            background: var(--main-color);
+            color: #fff;
+            text-align: center;
+            line-height: 150%;
+            letter-spacing: 2px;
+            padding: 10px 0;
+        }
+        .box{
+            /* 移动端自适应：宽度随屏幕伸缩，左右留白 */
+            width: auto;
+            margin: 12px 10px;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: #fff;
+        }
+        .box h3{
+            color: var(--main-color);
+            font-size: calc(var(--font-size) * 1.15);
+            margin-bottom: 8px;
+        }
+        .box p{ line-height: 180%; text-indent: 2em; margin-bottom: 6px; }
+        .info{ color: var(--main-color); font-weight: bold; }
+
+        /* ============ 固定全屏宽度底部导航 ============ */
+        .tabbar{
+            position: fixed;               /* 固定在视口底部 */
+            left: 0; right: 0; bottom: 0;   /* 左右贴边 = 全屏宽度 */
+            width: 100%;
+            height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);  /* 刘海屏安全区 */
+            display: flex;                  /* 4 项均分宽度 */
+            background: #fff;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 8px rgba(0,0,0,.06);
+            z-index: 999;
+        }
+        .tab-item{
+            flex: 1;                        /* 每项占 1/4，自适应屏幕宽度 */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: var(--nav-height);
+            color: #666;
+            text-decoration: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tab-item.active{ color: var(--main-color); }
+
+        /* 图标（SVG）：宽高固定，颜色跟随文字（fill 使用 currentColor） */
+        .tab-icon{
+            position: relative;
+            width: 26px;
+            height: 26px;
+        }
+        .tab-icon svg{
+            display: block;
+            width: 26px;
+            height: 26px;
+            color: inherit;                 /* SVG 颜色随导航项状态切换 */
+            fill: currentColor;
+        }
+        .tab-label{ font-size: 11px; }
+
+        /* 数字徽章：图标右上角 */
+        .badge{
+            position: absolute;
+            top: -7px;
+            right: -14px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            border-radius: 8px;
+            background: var(--badge-color);
+            color: #fff;
+            font-size: 10px;
+            font-style: normal;
+            line-height: 16px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 0 0 1px #fff;     /* 白色描边，压在图标上也清楚 */
+        }
+        /* 右上角红点：导航项右上角 */
+        .dot{
+            position: absolute;
+            top: 6px;
+            right: calc(50% - 24px);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--badge-color);
+            border: 1.5px solid #fff;
+        }
+    </style>
+</head>
+<body>
+    <h2>SVG 图标 · 移动端底部导航（13-4.html）</h2>
+
+    <div class="box">
+        <h3>知识点：SVG 图标 + 固定底部导航</h3>
+        <p>学号：<span class="info">313</span>，姓名：<span class="info">姚明涛</span>，班级：<span class="info">计算机24003</span>，
+            本实例的知识点：<span class="info">把 font/svg 目录下的 Remix Icon 图标以内联 &lt;svg&gt; 方式绘制移动端固定底导航，每项含数字徽章与右上角红点</span>
+        </p>
+        <p>导航使用 <span class="info">position: fixed + left/right: 0</span> 实现全屏宽度，<span class="info">flex: 1</span> 让 4 个导航项自适应均分屏幕宽度。</p>
+        <p>SVG 写在页面里（内联），通过 <span class="info">fill="currentColor"</span> 让图标颜色继承文字颜色，激活项变色无需改 SVG。</p>
+    </div>
+
+    <div class="box">
+        <h3>页面内容（可滚动，导航始终固定在底部）</h3>
+        <p>向下滚动页面，底部导航不会移动，它相对视口固定（fixed），并且始终占满整个屏幕宽度。</p>
+        <p>SVG 图标的大小由 width/height 控制，颜色由 color 控制，激活项通过 class="active" 切换配色。</p>
+    </div>
+
+    <!-- ===== 固定全屏宽度的底部导航（SVG 内联图标，路径来自 font/svg/*.svg） ===== -->
+    <nav class="tabbar">
+        <a class="tab-item active">
+            <span class="tab-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M21 20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.48907C3 9.18048 3.14247 8.88917 3.38606 8.69972L11.3861 2.47749C11.7472 2.19663 12.2528 2.19663 12.6139 2.47749L20.6139 8.69972C20.8575 8.88917 21 9.18048 21 9.48907V20ZM19 19V9.97815L12 4.53371L5 9.97815V19H19Z"/></svg>
+                <span class="badge">12</span>
+                <span class="dot"></span>
+            </span>
+            <span class="tab-label">首页</span>
+        </a>
+        <a class="tab-item">
+            <span class="tab-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M7 11.5C4.51472 11.5 2.5 9.48528 2.5 7C2.5 4.51472 4.51472 2.5 7 2.5C9.48528 2.5 11.5 4.51472 11.5 7C11.5 9.48528 9.48528 11.5 7 11.5ZM7 21.5C4.51472 21.5 2.5 19.4853 2.5 17C2.5 14.5147 4.51472 12.5 7 12.5C9.48528 12.5 11.5 14.5147 11.5 17C11.5 19.4853 9.48528 21.5 7 21.5ZM17 11.5C14.5147 11.5 12.5 9.48528 12.5 7C12.5 4.51472 14.5147 2.5 17 2.5C19.4853 2.5 21.5 4.51472 21.5 7C21.5 9.48528 19.4853 11.5 17 11.5ZM17 21.5C14.5147 21.5 12.5 19.4853 12.5 17C12.5 14.5147 14.5147 12.5 17 12.5C19.4853 12.5 21.5 14.5147 21.5 17C21.5 19.4853 19.4853 21.5 17 21.5ZM7 9.5C8.38071 9.5 9.5 8.38071 9.5 7C9.5 5.61929 8.38071 4.5 7 4.5C5.61929 4.5 4.5 5.61929 4.5 7C4.5 8.38071 5.61929 9.5 7 9.5ZM7 19.5C8.38071 19.5 9.5 18.3807 9.5 17C9.5 15.6193 8.38071 14.5 7 14.5C5.61929 14.5 4.5 15.6193 4.5 17C4.5 18.3807 5.61929 19.5 7 19.5ZM17 9.5C18.3807 9.5 19.5 8.38071 19.5 7C19.5 5.61929 18.3807 4.5 17 4.5C15.6193 4.5 14.5 5.61929 14.5 7C14.5 8.38071 15.6193 9.5 17 9.5ZM17 19.5C18.3807 19.5 19.5 18.3807 19.5 17C19.5 15.6193 18.3807 14.5 17 14.5C15.6193 14.5 14.5 15.6193 14.5 17C14.5 18.3807 15.6193 19.5 17 19.5Z"/></svg>
+                <span class="badge">5</span>
+                <span class="dot"></span>
+            </span>
+            <span class="tab-label">分类</span>
+        </a>
+        <a class="tab-item">
+            <span class="tab-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M7.29117 20.8242L2 22L3.17581 16.7088C2.42544 15.3056 2 13.7025 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C10.2975 22 8.6944 21.5746 7.29117 20.8242ZM7.58075 18.711L8.23428 19.0605C9.38248 19.6745 10.6655 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 13.3345 4.32549 14.6175 4.93949 15.7657L5.28896 16.4192L4.63416 19.3658L7.58075 18.711Z"/></svg>
+                <span class="badge">99+</span>
+                <span class="dot"></span>
+            </span>
+            <span class="tab-label">消息</span>
+        </a>
+        <a class="tab-item">
+            <span class="tab-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H18C18 18.6863 15.3137 16 12 16C8.68629 16 6 18.6863 6 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13ZM12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z"/></svg>
+                <span class="badge">3</span>
+                <span class="dot"></span>
+            </span>
+            <span class="tab-label">我的</span>
+        </a>
+    </nav>
+
+    <script>
+        document.querySelectorAll('.tab-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                document.querySelector('.tab-item.active').classList.remove('active');
+                item.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>17-3 商品列表</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --panel: #ffffff;
+            --primary: #0b5fff;
+            --primary-dark: #00359e;
+            --accent: #dfeaff;
+            --text: #22304a;
+            --muted: #64748b;
+            --border: #dfe7f5;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --star: #f59e0b;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef5ff 0%, #f9fbff 100%);
+            color: var(--text);
+        }
+
+        .container {
+            width: min(1100px, calc(100% - 32px));
+            margin: 40px auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 18px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+        }
+
+        .header p {
+            margin: 0;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: var(--primary-dark);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .status { font-size: 0.9rem; opacity: 0.9; }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            margin-top: 24px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            margin: 0 0 16px;
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+        }
+
+        .loading, .error, .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .error { color: #dc2626; }
+
+        .spinner {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--accent);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .product {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fafcff;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .product:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
+        }
+
+        .product .thumb {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #eef2f8;
+        }
+
+        .product .body {
+            padding: 14px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .product .category {
+            align-self: flex-start;
+            font-size: 0.75rem;
+            color: var(--primary-dark);
+            background: var(--accent);
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .product .title {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product .desc {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product .meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 8px;
+        }
+
+        .product .price {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #e11d48;
+        }
+
+        .product .rating {
+            font-size: 0.82rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .product .rating i { color: var(--star); }
+
+        .product .detail-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+
+        .product .detail-link:hover { background: var(--primary-dark); }
+
+        .footer {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            text-align: center;
+        }
+
+        .footer code {
+            background: var(--accent);
+            padding: 2px 8px;
+            border-radius: 6px;
+            color: var(--primary-dark);
+        }
+    </style>
+    <link rel="stylesheet" href="font/remixicon.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>商品列表</h1>
+            <p>通过 <strong>fetch</strong> 请求接口 <code>https://dummyjson.com/products?limit=8</code> 获取商品数据并展示，点击商品可查看详情。</p>
+            <div class="toolbar">
+                <button id="fetchBtn" class="btn btn-primary">
+                    <i class="ri-refresh-line"></i> 刷新列表
+                </button>
+                <span id="status" class="status"></span>
+            </div>
+        </header>
+
+        <section class="card">
+            <h2>商品信息</h2>
+            <div id="productList">
+                <div class="loading"><span class="spinner"></span>正在加载商品，请稍候…</div>
+            </div>
+        </section>
+
+        <div class="footer">
+            接口地址：<code>https://dummyjson.com/products?limit=8</code>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://dummyjson.com/products?limit=8';
+
+        const productListEl = document.getElementById('productList');
+        const statusEl = document.getElementById('status');
+        const fetchBtn = document.getElementById('fetchBtn');
+
+        function renderLoading() {
+            productListEl.innerHTML = '<div class="loading"><span class="spinner"></span>正在加载商品，请稍候…</div>';
+        }
+
+        function renderError(msg) {
+            productListEl.innerHTML = '<div class="error">加载失败：' + msg + '</div>';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        function renderProducts(products) {
+            if (!Array.isArray(products) || products.length === 0) {
+                productListEl.innerHTML = '<div class="empty">暂无商品</div>';
+                return;
+            }
+
+            const html = products.map(function (p) {
+                const thumb = p.thumbnail || '';
+                const title = escapeHtml(p.title || '未命名商品');
+                const desc = escapeHtml(p.description || '');
+                const category = escapeHtml(p.category || '');
+                const price = p.price != null ? '$' + Number(p.price).toFixed(2) : '—';
+                const rating = p.rating != null ? Number(p.rating).toFixed(1) : '—';
+                const detailUrl = '17-3-detail.html?id=' + encodeURIComponent(p.id);
+
+                return '' +
+                    '<div class="product">' +
+                        (thumb ? '<img class="thumb" src="' + escapeHtml(thumb) + '" alt="' + title + '" loading="lazy" onerror="this.style.visibility=\'hidden\'" />' : '<div class="thumb"></div>') +
+                        '<div class="body">' +
+                            '<span class="category">' + category + '</span>' +
+                            '<h3 class="title">' + title + '</h3>' +
+                            '<p class="desc">' + desc + '</p>' +
+                            '<div class="meta">' +
+                                '<span class="price">' + price + '</span>' +
+                                '<span class="rating"><i class="ri-star-fill"></i>' + rating + '</span>' +
+                            '</div>' +
+                            '<a class="detail-link" href="' + detailUrl + '">查看详情</a>' +
+                        '</div>' +
+                    '</div>';
+            }).join('');
+
+            productListEl.innerHTML = '<div class="grid">' + html + '</div>';
+        }
+
+        async function loadProducts() {
+            fetchBtn.disabled = true;
+            statusEl.textContent = '请求中…';
+            renderLoading();
+
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                const data = await res.json();
+                const products = (data && data.products) || [];
+
+                renderProducts(products);
+                statusEl.textContent = '加载成功，共 ' + products.length + ' 件商品';
+            } catch (err) {
+                renderError(err.message || String(err));
+                statusEl.textContent = '加载失败';
+            } finally {
+                fetchBtn.disabled = false;
+            }
+        }
+
+        fetchBtn.addEventListener('click', loadProducts);
+        loadProducts();
+    </script>
+</body>
+</html>

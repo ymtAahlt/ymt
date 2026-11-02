@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>313 姚明涛</title>
+    <!-- 本地CDN：Font Awesome 字体图标（CSS + webfont字体文件） -->
+    <link rel="stylesheet" href="cdn/fontawesome/css/all.min.css">
+    <style>
+        :root{
+            --main-color: #034;
+            --bg-color: #f5f5f5;
+            --font-size: 16px;
+            --border-color: #ccc;
+            --radius: 8px;
+        }
+        *{ margin: 0; padding: 0; }
+        body{
+            background-color: var(--bg-color);
+            font-size: var(--font-size);
+            color: #333;
+        }
+        h2{
+            background: var(--main-color);
+            color: #fff;
+            text-align: center;
+            line-height: 150%;
+            letter-spacing: 3px;
+            padding: 10px 0;
+        }
+        .box{
+            width: 640px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: #fff;
+        }
+        .box h3{
+            color: var(--main-color);
+            font-size: calc(var(--font-size) * 1.25);
+            margin-bottom: 10px;
+        }
+        .box p{
+            line-height: 180%;
+            text-indent: 2em;
+            margin-bottom: 12px;
+        }
+        .info{ color: var(--main-color); font-weight: bold; }
+        /* 图标网格 */
+        .icons{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .item{
+            width: 120px;
+            padding: 12px 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: var(--bg-color);
+        }
+        .item i, .item svg{
+            display: block;
+            font-size: 32px;
+            color: var(--main-color);
+            margin: 0 auto 6px;
+        }
+        .item span{
+            font-size: 12px;
+            color: #666;
+        }
+        /* 字体图标的大小、颜色可以像文字一样控制 */
+        .size-demo i{
+            font-size: 14px;
+            margin-right: 8px;
+        }
+        .size-demo .s2{ font-size: 24px; color: #c00; }
+        .size-demo .s3{ font-size: 48px; color: #06c; }
+    </style>
+</head>
+<body>
+    <h2>Font Awesome 字体图标（13-1.html）</h2>
+
+    <div class="box">
+        <h3>知识点：字体图标 font icon</h3>
+        <p>学号：<span class="info">313</span>，姓名：<span class="info">姚明涛</span>，班级：<span class="info">计算机24003</span>，
+            本实例的知识点：<span class="info">Font Awesome 通过 @font-face 引入字体文件，用 &lt;i class="fa-solid fa-xxx"&gt; 显示图标</span>
+        </p>
+        <p>图标本质是字体中的一个字符（伪元素 ::before 的 content），因此可以像文字一样用 font-size、color 设置大小和颜色。</p>
+    </div>
+
+    <div class="box">
+        <h3>实心图标（fa-solid）</h3>
+        <div class="icons">
+            <div class="item"><i class="fa-solid fa-house"></i><span>house</span></div>
+            <div class="item"><i class="fa-solid fa-user"></i><span>user</span></div>
+            <div class="item"><i class="fa-solid fa-magnifying-glass"></i><span>search</span></div>
+            <div class="item"><i class="fa-solid fa-heart"></i><span>heart</span></div>
+            <div class="item"><i class="fa-solid fa-envelope"></i><span>envelope</span></div>
+            <div class="item"><i class="fa-solid fa-camera"></i><span>camera</span></div>
+            <div class="item"><i class="fa-solid fa-star"></i><span>star</span></div>
+            <div class="item"><i class="fa-solid fa-gear"></i><span>gear</span></div>
+            <div class="item"><i class="fa-solid fa-trash"></i><span>trash</span></div>
+            <div class="item"><i class="fa-solid fa-download"></i><span>download</span></div>
+            <div class="item"><i class="fa-solid fa-play"></i><span>play</span></div>
+            <div class="item"><i class="fa-solid fa-bell"></i><span>bell</span></div>
+        </div>
+    </div>
+
+    <div class="box">
+        <h3>线性图标（fa-regular）与品牌图标（fa-brands）</h3>
+        <div class="icons">
+            <div class="item"><i class="fa-regular fa-user"></i><span>user</span></div>
+            <div class="item"><i class="fa-regular fa-heart"></i><span>heart</span></div>
+            <div class="item"><i class="fa-regular fa-star"></i><span>star</span></div>
+            <div class="item"><i class="fa-regular fa-comment"></i><span>comment</span></div>
+            <div class="item"><i class="fa-brands fa-github"></i><span>github</span></div>
+            <div class="item"><i class="fa-brands fa-weixin"></i><span>weixin</span></div>
+            <div class="item"><i class="fa-brands fa-qq"></i><span>qq</span></div>
+            <div class="item"><i class="fa-brands fa-html5"></i><span>html5</span></div>
+        </div>
+    </div>
+
+    <div class="box size-demo">
+        <h3>字体图标可像文字一样缩放、变色</h3>
+        <p>
+            <i class="fa-solid fa-music"></i> 14px
+            <i class="fa-solid fa-music s2"></i> 24px 红色
+            <i class="fa-solid fa-music s3"></i> 48px 蓝色
+        </p>
+    </div>
+</body>
+</html>

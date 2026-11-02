@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>17-3 商品详情</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --panel: #ffffff;
+            --primary: #0b5fff;
+            --primary-dark: #00359e;
+            --accent: #dfeaff;
+            --text: #22304a;
+            --muted: #64748b;
+            --border: #dfe7f5;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --star: #f59e0b;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef5ff 0%, #f9fbff 100%);
+            color: var(--text);
+        }
+
+        .container {
+            width: min(1100px, calc(100% - 32px));
+            margin: 40px auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 18px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+        }
+
+        .header p {
+            margin: 0;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 18px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 10px;
+            transition: background 0.15s;
+        }
+
+        .back-link:hover { background: rgba(255,255,255,0.12); }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            margin-top: 24px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .loading, .error, .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .error { color: #dc2626; }
+
+        .spinner {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--accent);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .detail {
+            display: grid;
+            grid-template-columns: minmax(280px, 420px) 1fr;
+            gap: 28px;
+        }
+
+        @media (max-width: 760px) {
+            .detail { grid-template-columns: 1fr; }
+        }
+
+        .gallery .main-img {
+            width: 100%;
+            border-radius: 14px;
+            background: #eef2f8;
+            object-fit: contain;
+            aspect-ratio: 1 / 1;
+        }
+
+        .thumbs {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .thumbs img {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            background: #eef2f8;
+            transition: border-color 0.15s;
+        }
+
+        .thumbs img.active { border-color: var(--primary); }
+
+        .info .category {
+            display: inline-block;
+            font-size: 0.8rem;
+            color: var(--primary-dark);
+            background: var(--accent);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .info h2 {
+            margin: 0 0 10px;
+            font-size: 1.6rem;
+            color: var(--text);
+        }
+
+        .info .brand {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 14px;
+        }
+
+        .info .rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 14px;
+        }
+
+        .info .rating i { color: var(--star); }
+
+        .info .price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .info .price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #e11d48;
+        }
+
+        .info .discount {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .info .desc {
+            line-height: 1.75;
+            color: #334155;
+            margin: 0 0 18px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .meta-item {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .meta-item .label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .meta-item .value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stock-ok { color: #16a34a; }
+        .stock-low { color: #d97706; }
+
+        pre {
+            margin: 0;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 14px;
+            padding: 20px;
+            overflow-x: auto;
+            line-height: 1.7;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .footer {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            text-align: center;
+        }
+
+        .footer code {
+            background: var(--accent);
+            padding: 2px 8px;
+            border-radius: 6px;
+            color: var(--primary-dark);
+        }
+    </style>
+    <link rel="stylesheet" href="font/remixicon.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>商品详情</h1>
+            <p>根据 URL 中的 <code>id</code> 参数请求 <code>https://dummyjson.com/products/{id}</code> 获取单个商品信息。</p>
+            <a class="back-link" href="17-3.html"><i class="ri-arrow-left-line"></i>返回商品列表</a>
+        </header>
+
+        <section class="card">
+            <div id="detail">
+                <div class="loading"><span class="spinner"></span>正在加载商品详情，请稍候…</div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 style="margin:0 0 16px;font-size:1.3rem;color:var(--primary-dark);">接口返回的原始 JSON</h2>
+            <pre id="rawJson">// 等待加载…</pre>
+        </section>
+
+        <div class="footer">
+            接口地址：<code id="apiUrl">https://dummyjson.com/products/{id}</code>
+        </div>
+    </div>
+
+    <script>
+        function getProductId() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            return id ? id : '1';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        function renderLoading() {
+            document.getElementById('detail').innerHTML =
+                '<div class="loading"><span class="spinner"></span>正在加载商品详情，请稍候…</div>';
+        }
+
+        function renderError(msg) {
+            document.getElementById('detail').innerHTML =
+                '<div class="error">加载失败：' + msg + '</div>';
+        }
+
+        function renderDetail(p) {
+            if (!p || typeof p !== 'object') {
+                document.getElementById('detail').innerHTML = '<div class="empty">未找到该商品</div>';
+                return;
+            }
+
+            const images = Array.isArray(p.images) ? p.images : [];
+            const thumb = p.thumbnail || (images[0] || '');
+
+            const thumbsHtml = images.length
+                ? images.map(function (src, idx) {
+                    return '<img src="' + escapeHtml(src) + '" alt="thumb" data-idx="' + idx + '" class="' + (idx === 0 ? 'active' : '') + '" />';
+                }).join('')
+                : '';
+
+            const category = escapeHtml(p.category || '未分类');
+            const title = escapeHtml(p.title || '未命名商品');
+            const brand = p.brand ? escapeHtml(p.brand) : '';
+            const rating = p.rating != null ? Number(p.rating).toFixed(2) : '—';
+            const price = p.price != null ? '$' + Number(p.price).toFixed(2) : '—';
+            const discount = p.discountPercentage != null
+                ? '-' + Number(p.discountPercentage).toFixed(1) + '%'
+                : '';
+            const desc = escapeHtml(p.description || '暂无描述');
+            const stock = p.stock != null ? p.stock : '—';
+            const stockClass = typeof p.stock === 'number'
+                ? (p.stock > 20 ? 'stock-ok' : 'stock-low')
+                : '';
+
+            document.getElementById('detail').innerHTML = '' +
+                '<div class="detail">' +
+                    '<div class="gallery">' +
+                        (thumb ? '<img class="main-img" id="mainImg" src="' + escapeHtml(thumb) + '" alt="' + title + '" />' : '<div class="main-img"></div>') +
+                        (thumbsHtml ? '<div class="thumbs" id="thumbs">' + thumbsHtml + '</div>' : '') +
+                    '</div>' +
+                    '<div class="info">' +
+                        '<span class="category">' + category + '</span>' +
+                        '<h2>' + title + '</h2>' +
+                        (brand ? '<div class="brand">品牌：' + brand + '</div>' : '') +
+                        '<div class="rating"><i class="ri-star-fill"></i>' + rating + ' 分</div>' +
+                        '<div class="price-row">' +
+                            '<span class="price">' + price + '</span>' +
+                            (discount ? '<span class="discount">' + discount + '</span>' : '') +
+                        '</div>' +
+                        '<p class="desc">' + desc + '</p>' +
+                        '<div class="meta-grid">' +
+                            '<div class="meta-item"><div class="label">商品 ID</div><div class="value">' + escapeHtml(p.id) + '</div></div>' +
+                            '<div class="meta-item"><div class="label">库存</div><div class="value ' + stockClass + '">' + escapeHtml(stock) + '</div></div>' +
+                            '<div class="meta-item"><div class="label">评分</div><div class="value">' + rating + '</div></div>' +
+                            '<div class="meta-item"><div class="label">折扣</div><div class="value">' + (discount || '—') + '</div></div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+            // 缩略图切换主图
+            const thumbs = document.getElementById('thumbs');
+            const mainImg = document.getElementById('mainImg');
+            if (thumbs && mainImg) {
+                thumbs.addEventListener('click', function (e) {
+                    const t = e.target.closest('img');
+                    if (!t) return;
+                    mainImg.src = t.src;
+                    Array.prototype.forEach.call(thumbs.children, function (c) { c.classList.remove('active'); });
+                    t.classList.add('active');
+                });
+            }
+        }
+
+        async function loadDetail() {
+            const id = getProductId();
+            const url = 'https://dummyjson.com/products/' + encodeURIComponent(id);
+            document.getElementById('apiUrl').textContent = url;
+
+            renderLoading();
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                const data = await res.json();
+
+                renderDetail(data);
+                document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                renderError(err.message || String(err));
+            }
+        }
+
+        loadDetail();
+    </script>
+</body>
+</html>

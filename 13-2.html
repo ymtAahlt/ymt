@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>313 姚明涛</title>
+    <style>
+        :root{
+            --main-color: #034;
+            --bg-color: #f5f5f5;
+            --font-size: 16px;
+            --border-color: #ccc;
+            --radius: 8px;
+        }
+        *{ margin: 0; padding: 0; }
+        body{
+            background-color: var(--bg-color);
+            font-size: var(--font-size);
+            color: #333;
+        }
+        h2{
+            background: var(--main-color);
+            color: #fff;
+            text-align: center;
+            line-height: 150%;
+            letter-spacing: 3px;
+            padding: 10px 0;
+        }
+        .box{
+            width: 640px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: #fff;
+        }
+        .box h3{
+            color: var(--main-color);
+            font-size: calc(var(--font-size) * 1.25);
+            margin-bottom: 10px;
+        }
+        .box p{
+            line-height: 180%;
+            text-indent: 2em;
+            margin-bottom: 12px;
+        }
+        .info{ color: var(--main-color); font-weight: bold; }
+        .icons{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .item{
+            width: 120px;
+            padding: 12px 0;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: var(--bg-color);
+        }
+        .item svg{
+            display: block;
+            width: 32px;
+            height: 32px;
+            margin: 0 auto 6px;
+            color: var(--main-color);
+        }
+        .item span{
+            font-size: 12px;
+            color: #666;
+        }
+        .size-demo svg{ display: inline-block; vertical-align: middle; margin-right: 8px; }
+        .s1{ width: 16px; height: 16px; }
+        .s2{ width: 32px; height: 32px; color: #c00; }
+        .s3{ width: 56px; height: 56px; color: #06c; }
+        code{
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+    <h2>Lucide SVG 图标（13-2.html）</h2>
+
+    <div class="box">
+        <h3>知识点：SVG 图标</h3>
+        <p>学号：<span class="info">313</span>，姓名：<span class="info">姚明涛</span>，班级：<span class="info">计算机24003</span>，
+            本实例的知识点：<span class="info">Lucide 图标库以 SVG 形式渲染，写 &lt;i data-lucide="home"&gt; 后由 lucide.js 替换为内联 &lt;svg&gt;</span>
+        </p>
+        <p>页面中先放占位元素 <code>&lt;i data-lucide="图标名"&gt;&lt;/i&gt;</code>，引入本地 <code>cdn/lucide/lucide.min.js</code> 后调用 <code>lucide.createIcons()</code>，浏览器打开开发者工具即可看到标签已变成 <code>&lt;svg&gt;</code>。</p>
+    </div>
+
+    <div class="box">
+        <h3>常用图标（SVG）</h3>
+        <div class="icons">
+            <div class="item"><i data-lucide="house"></i><span>house</span></div>
+            <div class="item"><i data-lucide="user"></i><span>user</span></div>
+            <div class="item"><i data-lucide="search"></i><span>search</span></div>
+            <div class="item"><i data-lucide="heart"></i><span>heart</span></div>
+            <div class="item"><i data-lucide="mail"></i><span>mail</span></div>
+            <div class="item"><i data-lucide="camera"></i><span>camera</span></div>
+            <div class="item"><i data-lucide="star"></i><span>star</span></div>
+            <div class="item"><i data-lucide="settings"></i><span>settings</span></div>
+            <div class="item"><i data-lucide="trash-2"></i><span>trash-2</span></div>
+            <div class="item"><i data-lucide="download"></i><span>download</span></div>
+            <div class="item"><i data-lucide="play"></i><span>play</span></div>
+            <div class="item"><i data-lucide="bell"></i><span>bell</span></div>
+        </div>
+    </div>
+
+    <div class="box">
+        <h3>更多图标（SVG）</h3>
+        <div class="icons">
+            <div class="item"><i data-lucide="github"></i><span>github</span></div>
+            <div class="item"><i data-lucide="calendar"></i><span>calendar</span></div>
+            <div class="item"><i data-lucide="clock"></i><span>clock</span></div>
+            <div class="item"><i data-lucide="map-pin"></i><span>map-pin</span></div>
+            <div class="item"><i data-lucide="image"></i><span>image</span></div>
+            <div class="item"><i data-lucide="folder"></i><span>folder</span></div>
+            <div class="item"><i data-lucide="file-text"></i><span>file-text</span></div>
+            <div class="item"><i data-lucide="message-circle"></i><span>message-circle</span></div>
+        </div>
+    </div>
+
+    <div class="box size-demo">
+        <h3>SVG 图标可直接改宽高、颜色（stroke 使用 currentColor）</h3>
+        <p>
+            <i data-lucide="music" class="s1"></i>
+            <i data-lucide="music" class="s2"></i>
+            <i data-lucide="music" class="s3"></i>
+        </p>
+    </div>
+
+    <!-- 本地CDN：Lucide 图标库（生成 SVG） -->
+    <script src="cdn/lucide/lucide.min.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

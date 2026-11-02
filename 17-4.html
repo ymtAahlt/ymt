@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>17-4 远程接口测试工具</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --panel: #ffffff;
+            --primary: #0b5fff;
+            --primary-dark: #00359e;
+            --accent: #dfeaff;
+            --text: #22304a;
+            --muted: #64748b;
+            --border: #dfe7f5;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warn: #d97706;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef5ff 0%, #f9fbff 100%);
+            color: var(--text);
+        }
+
+        .container {
+            width: min(1180px, calc(100% - 32px));
+            margin: 40px auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 18px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            margin: 0 0 10px;
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+        }
+
+        .header p {
+            margin: 0;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            margin-top: 24px;
+            padding: 22px 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            margin: 0 0 16px;
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+        }
+
+        /* ============ Request Form ============ */
+        .row {
+            display: grid;
+            gap: 14px;
+        }
+
+        .row-2 { grid-template-columns: 140px 1fr auto; }
+        @media (max-width: 720px) {
+            .row-2 { grid-template-columns: 1fr; }
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .field select,
+        .field input,
+        .field textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fafcff;
+            color: var(--text);
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .field select:focus,
+        .field input:focus,
+        .field textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(11, 95, 255, 0.15);
+        }
+
+        .field textarea {
+            min-height: 160px;
+            resize: vertical;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .row-3 { grid-template-columns: repeat(3, 1fr); }
+        @media (max-width: 720px) { .row-3 { grid-template-columns: 1fr; } }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 6px 18px rgba(11, 95, 255, 0.3);
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .btn-ghost {
+            background: var(--accent);
+            color: var(--primary-dark);
+        }
+
+        .btn-ghost:hover { background: #cfe0ff; }
+
+        .preset-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .preset-chip {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            color: var(--text);
+            transition: all 0.15s;
+        }
+
+        .preset-chip:hover { background: var(--accent); color: var(--primary-dark); border-color: var(--primary); }
+
+        /* ============ Response ============ */
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .meta .pill {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            background: var(--accent);
+            color: var(--primary-dark);
+        }
+
+        .pill.ok { background: #dcfce7; color: var(--success); }
+        .pill.err { background: #fee2e2; color: var(--danger); }
+        .pill.warn { background: #fef3c7; color: var(--warn); }
+
+        pre {
+            margin: 0;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 14px;
+            padding: 20px;
+            overflow-x: auto;
+            line-height: 1.7;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 480px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 14px;
+        }
+
+        .tab {
+            padding: 10px 18px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .tab.active {
+            color: var(--primary-dark);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .error-box {
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #fff1f2;
+            border: 1px solid #fecaca;
+            color: var(--danger);
+            margin-bottom: 12px;
+            white-space: pre-wrap;
+            font-family: Consolas, monospace;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            text-align: center;
+        }
+    </style>
+    <link rel="stylesheet" href="font/remixicon.css" />
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>远程接口测试工具</h1>
+            <p>支持 <strong>GET / POST / PUT / DELETE</strong> 等方法，可自定义请求头与请求体，实时展示响应状态、耗时与原始 JSON。</p>
+        </header>
+
+        <section class="card">
+            <h2>请求配置</h2>
+
+            <div class="preset-row">
+                <span class="preset-chip" data-url="https://jsonplaceholder.typicode.com/posts" data-method="GET">GET posts 列表</span>
+                <span class="preset-chip" data-url="https://jsonplaceholder.typicode.com/posts/1" data-method="GET">GET posts/1 详情</span>
+                <span class="preset-chip" data-url="https://jsonplaceholder.typicode.com/posts" data-method="POST">POST 创建 post</span>
+                <span class="preset-chip" data-url="https://jsonplaceholder.typicode.com/posts/1" data-method="PUT">PUT 更新 post</span>
+                <span class="preset-chip" data-url="https://jsonplaceholder.typicode.com/posts/1" data-method="DELETE">DELETE 删除</span>
+                <span class="preset-chip" data-url="https://dummyjson.com/products?limit=3" data-method="GET">GET 商品</span>
+            </div>
+
+            <div class="row row-2">
+                <div class="field">
+                    <label>请求方法</label>
+                    <select id="method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="PATCH">PATCH</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="HEAD">HEAD</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>接口地址 (URL)</label>
+                    <input id="url" type="text" value="https://jsonplaceholder.typicode.com/posts" placeholder="https://..." />
+                </div>
+                <div class="field">
+                    <label>&nbsp;</label>
+                    <button id="sendBtn" class="btn btn-primary" style="width:100%;justify-content:center;">
+                        <i class="ri-send-plane-line"></i> 发送请求
+                    </button>
+                </div>
+            </div>
+
+            <div class="row row-2" style="margin-top:14px;">
+                <div class="field" style="grid-column:1 / -1;">
+                    <label>请求头 (Headers，JSON 格式)</label>
+                    <textarea id="headers" placeholder='例如：{"Content-Type":"application/json","Authorization":"Bearer xxx"}'></textarea>
+                </div>
+                <div class="field" style="grid-column:1 / -1;">
+                    <label>请求体 (Body，JSON 格式；GET / HEAD 将忽略)</label>
+                    <textarea id="body" placeholder='例如：{"title":"测试标题","body":"内容","userId":1}'></textarea>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button id="fillBodyBtn" class="btn btn-ghost"><i class="ri-file-add-line"></i>填入示例 JSON</button>
+                <button id="clearBtn" class="btn btn-ghost"><i class="ri-delete-bin-line"></i>清空</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>响应结果</h2>
+
+            <div id="metaArea" class="meta">
+                <span class="pill">等待发送请求…</span>
+            </div>
+
+            <div id="errorArea"></div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="bodyTab">响应体</div>
+                <div class="tab" data-tab="headersTab">响应头</div>
+                <div class="tab" data-tab="reqTab">本次请求配置</div>
+            </div>
+
+            <div id="bodyTab" class="tab-panel active">
+                <pre id="respBody">// 暂无响应，先发送一次请求吧</pre>
+            </div>
+            <div id="headersTab" class="tab-panel">
+                <pre id="respHeaders">// 暂无响应头</pre>
+            </div>
+            <div id="reqTab" class="tab-panel">
+                <pre id="reqInfo">// 暂无请求记录</pre>
+            </div>
+        </section>
+
+        <div class="footer">
+            示例接口来自 jsonplaceholder.typicode.com 与 dummyjson.com（均支持 CORS 跨域）
+        </div>
+    </div>
+
+    <script>
+        const $ = function (id) { return document.getElementById(id); };
+
+        const urlEl = $('url');
+        const methodEl = $('method');
+        const headersEl = $('headers');
+        const bodyEl = $('body');
+        const sendBtn = $('sendBtn');
+        const fillBodyBtn = $('fillBodyBtn');
+        const clearBtn = $('clearBtn');
+        const metaArea = $('metaArea');
+        const errorArea = $('errorArea');
+        const respBody = $('respBody');
+        const respHeaders = $('respHeaders');
+        const reqInfo = $('reqInfo');
+
+        // 预设点击
+        document.querySelectorAll('.preset-chip').forEach(function (chip) {
+            chip.addEventListener('click', function () {
+                urlEl.value = chip.getAttribute('data-url');
+                methodEl.value = chip.getAttribute('data-method');
+                if (chip.getAttribute('data-method') === 'POST') {
+                    bodyEl.value = JSON.stringify({ title: "foo", body: "bar", userId: 1 }, null, 2);
+                    headersEl.value = JSON.stringify({ "Content-Type": "application/json" }, null, 2);
+                } else {
+                    bodyEl.value = '';
+                }
+                clearError();
+                clearMeta();
+                respBody.textContent = '// 已载入预设，点击"发送请求"';
+                respHeaders.textContent = '';
+            });
+        });
+
+        // 示例 JSON
+        fillBodyBtn.addEventListener('click', function () {
+            if (methodEl.value === 'POST' || methodEl.value === 'PUT' || methodEl.value === 'PATCH') {
+                bodyEl.value = JSON.stringify({ title: "测试标题", body: "这里是请求体内容", userId: 1 }, null, 2);
+            }
+            headersEl.value = JSON.stringify({ "Content-Type": "application/json" }, null, 2);
+        });
+
+        // 清空
+        clearBtn.addEventListener('click', function () {
+            urlEl.value = '';
+            headersEl.value = '';
+            bodyEl.value = '';
+            clearError();
+            clearMeta();
+            respBody.textContent = '// 已清空';
+            respHeaders.textContent = '';
+            reqInfo.textContent = '';
+        });
+
+        // Tab 切换
+        document.querySelectorAll('.tab').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+                document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+                tab.classList.add('active');
+                $('tab').parentElement;
+                const id = tab.getAttribute('data-tab');
+                $(id).classList.add('active');
+            });
+        });
+
+        function clearError() { errorArea.innerHTML = ''; }
+        function clearMeta() { metaArea.innerHTML = '<span class="pill">等待发送请求…</span>'; }
+
+        function showError(msg) {
+            errorArea.innerHTML = '<div class="error-box">' + String(msg).replace(/</g, '&lt;') + '</div>';
+        }
+
+        function tryParseJSON(str) {
+            if (!str) return null;
+            try { return JSON.parse(str); } catch (e) { return null; }
+        }
+
+        async function sendRequest() {
+            clearError();
+            const url = urlEl.value.trim();
+            const method = methodEl.value;
+
+            if (!url) {
+                showError('请输入接口 URL');
+                return;
+            }
+
+            // 解析请求头
+            let headersObj = {};
+            const headersText = headersEl.value.trim();
+            if (headersText) {
+                const p = tryParseJSON(headersText);
+                if (!p || typeof p !== 'object' || Array.isArray(p)) {
+                    showError('请求头必须是合法的 JSON 对象，例如 {"Content-Type":"application/json"}');
+                    return;
+                }
+                headersObj = p;
+            }
+
+            // 解析请求体
+            let bodyStr = null;
+            if (method !== 'GET' && method !== 'HEAD' && method !== 'DELETE') {
+                const bodyText = bodyEl.value.trim();
+                if (bodyText) {
+                    const p = tryParseJSON(bodyText);
+                    if (!p) {
+                        showError('请求体必须是合法的 JSON');
+                        return;
+                    }
+                    // 如果没显式设置 Content-Type，自动补上
+                    const hasCT = Object.keys(headersObj).some(function (k) { return k.toLowerCase() === 'content-type'; });
+                    if (!hasCT) {
+                        headersObj['Content-Type'] = 'application/json';
+                    }
+                    bodyStr = JSON.stringify(p);
+                }
+            }
+
+            const reqOpt = {
+                method: method,
+                headers: headersObj,
+                body: bodyStr,
+                credentials: 'omit'
+            };
+
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> 请求中…';
+            metaArea.innerHTML = '<span class="pill">请求中…</span>';
+            respBody.textContent = '// 正在请求…';
+            respHeaders.textContent = '';
+            reqInfo.textContent = JSON.stringify({ url: url, options: reqOpt }, null, 2);
+
+            const t0 = performance.now();
+
+            try {
+                const res = await fetch(url, reqOpt);
+                const elapsed = (performance.now() - t0).toFixed(1);
+
+                // 响应头
+                const h = {};
+                res.headers.forEach(function (v, k) { h[k] = v; });
+                respHeaders.textContent = JSON.stringify(h, null, 2);
+
+                // 响应体
+                const text = await res.text();
+                let pretty = text;
+                const parsed = tryParseJSON(text);
+                if (parsed !== null) {
+                    pretty = JSON.stringify(parsed, null, 2);
+                }
+
+                respBody.textContent = pretty || '(空响应)';
+
+                // 状态 pill
+                const statusClass = res.ok ? 'ok' : 'err';
+                const statusText = res.ok ? '成功' : '失败';
+                metaArea.innerHTML =
+                    '<span class="pill ' + statusClass + '">HTTP ' + res.status + ' ' + statusText + '</span>' +
+                    '<span class="pill">耗时 ' + elapsed + ' ms</span>' +
+                    '<span class="pill">方法 ' + method + '</span>' +
+                    '<span class="pill">类型 ' + (h['content-type'] || '—') + '</span>';
+
+                if (!res.ok) {
+                    showError('接口返回非 2xx 状态码：HTTP ' + res.status + ' ' + res.statusText +
+                        '\n\n响应片段：\n' + text.slice(0, 500));
+                }
+            } catch (err) {
+                const elapsed = (performance.now() - t0).toFixed(1);
+                metaArea.innerHTML =
+                    '<span class="pill err">请求异常</span>' +
+                    '<span class="pill">耗时 ' + elapsed + ' ms</span>';
+                respBody.textContent = '// 请求异常：' + (err && err.message ? err.message : String(err));
+                showError('请求异常：' + (err && err.message ? err.message : String(err)) +
+                    '\n\n可能原因：\n1) URL 写错或网络不通\n2) 接口不支持跨域 (CORS)\n3) 请求头格式不正确\n4) 被浏览器扩展拦截');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="ri-send-plane-line"></i> 发送请求';
+            }
+        }
+
+        sendBtn.addEventListener('click', sendRequest);
+
+        // Ctrl/Cmd + Enter 发送
+        [urlEl, headersEl, bodyEl].forEach(function (el) {
+            el.addEventListener('keydown', function (e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    sendRequest();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

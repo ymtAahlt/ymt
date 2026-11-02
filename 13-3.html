@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 移动端视口：宽度=设备宽度，初始缩放1，全面屏支持 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>313 姚明涛</title>
+    <!-- 本地字体图标：Remix Icon iconfont -->
+    <link rel="stylesheet" href="font/remixicon.css">
+    <style>
+        :root{
+            --main-color: #034;
+            --bg-color: #f5f5f5;
+            --font-size: 16px;
+            --border-color: #ccc;
+            --radius: 8px;
+            --badge-color: #f53f3f;   /* 徽章/红点颜色 */
+            --nav-height: 56px;        /* 底部导航高度（固定值） */
+        }
+        *{ margin: 0; padding: 0; box-sizing: border-box; }
+        html{ -webkit-text-size-adjust: 100%; }
+        body{
+            background-color: var(--bg-color);
+            font-size: var(--font-size);
+            color: #333;
+            /* 给固定导航留出高度 + iPhone 底部安全区 */
+            padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 12px);
+        }
+        h2{
+            background: var(--main-color);
+            color: #fff;
+            text-align: center;
+            line-height: 150%;
+            letter-spacing: 2px;
+            padding: 10px 0;
+        }
+        .box{
+            /* 移动端自适应：宽度随屏幕伸缩，左右留白 */
+            width: auto;
+            margin: 12px 10px;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            background: #fff;
+        }
+        .box h3{
+            color: var(--main-color);
+            font-size: calc(var(--font-size) * 1.15);
+            margin-bottom: 8px;
+        }
+        .box p{ line-height: 180%; text-indent: 2em; margin-bottom: 6px; }
+        .info{ color: var(--main-color); font-weight: bold; }
+
+        /* ============ 固定全屏宽度底部导航 ============ */
+        .tabbar{
+            position: fixed;               /* 固定在视口底部 */
+            left: 0; right: 0; bottom: 0;   /* 左右贴边 = 全屏宽度 */
+            width: 100%;
+            height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);  /* 刘海屏安全区 */
+            display: flex;                  /* 4 项均分宽度 */
+            background: #fff;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 8px rgba(0,0,0,.06);
+            z-index: 999;
+        }
+        .tab-item{
+            flex: 1;                        /* 每项占 1/4，自适应屏幕宽度 */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: var(--nav-height);
+            color: #666;
+            text-decoration: none;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tab-item.active{ color: var(--main-color); }
+
+        /* 图标（字体图标） */
+        .tab-icon{
+            position: relative;
+            width: 26px;
+            height: 26px;
+            font-size: 24px;               /* 字体图标可像文字一样设置大小 */
+            line-height: 26px;
+        }
+        .tab-icon i{ font-style: normal; }
+        .tab-label{ font-size: 11px; }
+
+        /* 数字徽章：图标右上角 */
+        .badge{
+            position: absolute;
+            top: -7px;
+            right: -14px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            border-radius: 8px;
+            background: var(--badge-color);
+            color: #fff;
+            font-size: 10px;
+            font-style: normal;
+            line-height: 16px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 0 0 1px #fff;     /* 白色描边，压在图标上也清楚 */
+        }
+        /* 右上角红点：导航项右上角 */
+        .dot{
+            position: absolute;
+            top: 6px;
+            right: calc(50% - 24px);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--badge-color);
+            border: 1.5px solid #fff;
+        }
+    </style>
+</head>
+<body>
+    <h2>iconfont 字体图标 · 移动端底部导航（13-3.html）</h2>
+
+    <div class="box">
+        <h3>知识点：iconfont 字体图标 + 固定底部导航</h3>
+        <p>学号：<span class="info">313</span>，姓名：<span class="info">姚明涛</span>，班级：<span class="info">计算机24003</span>，
+            本实例的知识点：<span class="info">用 font 目录下的 Remix Icon iconfont（ri-xxx）绘制移动端固定底导航，每项含数字徽章与右上角红点</span>
+        </p>
+        <p>导航使用 <span class="info">position: fixed + left/right: 0</span> 实现全屏宽度，<span class="info">flex: 1</span> 让 4 个导航项自适应均分屏幕宽度。</p>
+        <p>徽章与红点用 <span class="info">position: absolute</span> 定位在图标/导航项的右上角。</p>
+    </div>
+
+    <div class="box">
+        <h3>页面内容（可滚动，导航始终固定在底部）</h3>
+        <p>向下滚动页面，底部导航不会移动，它相对视口固定（fixed），并且始终占满整个屏幕宽度。</p>
+        <p>字体图标的大小由 font-size 控制，颜色由 color 控制，激活项通过 class="active" 切换配色。</p>
+    </div>
+
+    <!-- ===== 固定全屏宽度的底部导航（字体图标） ===== -->
+    <nav class="tabbar">
+        <a class="tab-item active">
+            <span class="tab-icon">
+                <i class="ri-home-line"></i>
+                <span class="badge">12</span>
+                <span class="dot"></span>
+            </span>
+            <span class="tab-label">首页</span>
+        </a>
+        <a class="tab-item">
+            <span class="tab-icon">
+                <i class="ri-apps-2-line"></i>
+                <span class="badge">5</span>
+                <span class="dot"></span>
+            </span>
+            <span class="tab-label">分类</span>
+        </a>
+        <a class="tab-item">
+            <span class="tab-icon">
+                <i class="ri-chat-3-line"></i>
+                <span class="badge">99+</span>
+                <span class="dot"></span>
+            </span>
+            <span class="tab-label">消息</span>
+        </a>
+        <a class="tab-item">
+            <span class="tab-icon">
+                <i class="ri-user-line"></i>
+                <span class="badge">3</span>
+                <span class="dot"></span>
+            </span>
+            <span class="tab-label">我的</span>
+        </a>
+    </nav>
+
+    <script>
+        document.querySelectorAll('.tab-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                document.querySelector('.tab-item.active').classList.remove('active');
+                item.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
